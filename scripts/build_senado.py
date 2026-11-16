@@ -33,11 +33,11 @@ for s in re.findall(r"<senador>(.*?)</senador>", vig, re.S):
 
 bills, votes = [], {}
 for area, bol, fecha, short in PICK:
-    d = open(f"{RAW}/sen/{bol}.xml", encoding="utf-8", errors="replace").read()
+    d = open(f"{RAW}/sen_{bol}.xml", encoding="utf-8", errors="replace").read()
     cands = [v for v in re.findall(r"<votacion>(.*?)</votacion>", d, re.S)
              if iso(G("FECHA", v)) == fecha and G("TIPOVOTACION", v) in ("Discusión general", "Discusión única")]
     v = max(cands, key=lambda v: v.count("<VOTO>"))
-    t = open(f"{RAW}/tram/{bol}.xml", encoding="utf-8", errors="replace").read()
+    t = open(f"{RAW}/tram_{bol}.xml", encoding="utf-8", errors="replace").read()
     ingreso = iso(G("fecha_ingreso", t))
     autores = [disp(a) for a in re.findall(r"<PARLAMENTARIO>(.*?)</PARLAMENTARIO>", G("autores", t) or "")]
     ini = G("iniciativa", t)

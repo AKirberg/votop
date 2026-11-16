@@ -11,7 +11,7 @@ No se usan los datos abiertos de la Cámara: hoy asignan mal los nombres de quie
 ## Regenerar
 
 ```bash
-python3 scripts/build_senado.py <carpeta-con-xml> data/senado.json
+python3 scripts/build_senado.py data/raw data/senado.json
 ```
 
 `build_senado.py` lee los XML descargados de `votaciones.php`, `tramitacion.php` y `senadores_vigentes.php`. Después se inyecta `data/senado.json` en `scripts/template.html` para producir `index.html`.
