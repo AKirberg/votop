@@ -144,7 +144,7 @@ details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: 
     <p class="lead">Reparte tu margen de impuestos, vota proyectos sin saber quién los presentó y mira con qué senadores coincides.</p>
   </header>
 
-  <div class="banner" role="note"><b>Votos reales.</b> 12 votaciones nominales del Senado entre 2022 y 2025, tomadas de los <a href="https://tramitacion.senado.cl/" target="_blank" rel="noopener">datos abiertos del Senado</a> el __BUILT__. Cada conteo por senador cuadra con el total oficial de la votación.</div>
+  <div class="banner" role="note"><b>Votos reales.</b> __NV__ votaciones nominales del Senado entre 2022 y 2025, tomadas de los <a href="https://tramitacion.senado.cl/" target="_blank" rel="noopener">datos abiertos del Senado</a> el __BUILT__. Cada conteo por senador cuadra con el total oficial de la votación.</div>
 
   <nav class="steps" aria-label="Pasos">
     <button class="step-btn" data-go="1"><b>1. Reparto</b><span>Tu margen de impuestos</span></button>
@@ -155,7 +155,7 @@ details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: 
   <section class="panel" id="p1" aria-labelledby="h1a">
     <div>
       <h2 id="h1a">Reparte el margen que sí puedes decidir</h2>
-      <p class="lead">Una parte del gasto público ya está fijada por ley. Tú decides cómo repartir el resto entre las seis áreas del piloto. Poner más en un área obliga a sacar de otra.</p>
+      <p class="lead">Una parte del gasto público ya está fijada por ley. Tú decides cómo repartir el resto entre las __NA__ áreas del piloto. Poner más en un área obliga a sacar de otra.</p>
     </div>
     <div class="row">
       <div class="field">
@@ -231,7 +231,7 @@ var DATA = __DATA__;
     { id: "lyd", pct: 73, label: "Libertad y Desarrollo: 73%", hint: "Gasto por leyes permanentes sobre el gasto total del presupuesto 2026." },
     { id: "cep", pct: 83, label: "CEP Chile: 83%", hint: "Gasto comprometido por leyes permanentes; máximo de la serie en 2026 y se mantiene en 2027." }
   ];
-  var EXAMPLE_W = [25, 20, 20, 15, 10, 10];
+  var EXAMPLE_W = [25, 20, 15, 15, 10, 10, 5];
   var SHOW = 10;
 
   var state = { def: "dipres", tax: 2400000, w: EXAMPLE_W.slice(0, AREAS.length), ans: {}, q: "", all: false };
@@ -248,14 +248,33 @@ var DATA = __DATA__;
 
   function whatVoted(b) {
     if (/^Aprobaci[oó]n de las enmiendas/i.test(b.tema)) return "Votación única: aprobar los cambios que hizo la Cámara de Diputados al proyecto.";
+    if (/Comisión Mixta/.test(b.tipo)) return "Votación del informe de la Comisión Mixta: aprobar el texto que acordaron el Senado y la Cámara de Diputados.";
     if (b.tipo === "Discusión general") return "Votación en general: aprobar la idea de legislar este proyecto.";
     return "Votación única del proyecto.";
   }
-  function passed(b) { return !/^Rechazo/i.test(b.tema); }
+  function passed(b) { return !/^Rechazo|RECHAZAD/i.test(b.tema); }
   function author(b) {
     if (b.ini === "Mensaje") return b.gob + " (mensaje, " + b.ingreso.slice(0, 4) + ")";
     var n = b.autores.length;
     return "Moción de " + b.autores.slice(0, 3).join(", ") + (n > 3 ? " y " + (n - 3) + " más" : "") + " (" + b.ingreso.slice(0, 4) + ")";
+  }
+  function span(a, b) {
+    var x = a.split("-").map(Number), y = b.split("-").map(Number);
+    var m = (y[0] - x[0]) * 12 + (y[1] - x[1]) - (y[2] < x[2] ? 1 : 0);
+    var yy = Math.floor(m / 12), mm = m % 12;
+    if (m < 1) return "menos de un mes";
+    return (yy ? yy + (yy === 1 ? " año" : " años") : "") + (yy && mm ? " y " : "") + (mm ? mm + (mm === 1 ? " mes" : " meses") : "");
+  }
+  function after(b) {
+    var out;
+    if (b.publicado) {
+      out = (/^Ley/.test(b.ley) ? b.ley + ", publicada" : b.ley.replace("D.S", "Decreto Supremo") + ", publicado") + " el " + fecha(b.publicado) + ", " + span(b.ingreso, b.publicado) + " después de ingresar.";
+      if (!passed(b)) out = "Se rechazó en esta votación, pero después se aprobó: " + out;
+    } else if (/Archivado/i.test(b.estado)) out = "Archivado.";
+    else if (/Rechazado/i.test(b.estado)) out = "Rechazado.";
+    else out = "Sigue en tramitación: " + b.etapaActual.replace(/\s*\(C\.Diputados\)/, " en la Cámara de Diputados").replace(/\s*\(Senado\)/, " en el Senado").replace(/^./, function (c) { return c.toLowerCase(); }) + ".";
+    if (b.refundidos.length) out += " Se tramitó junto con " + (b.refundidos.length === 1 ? "el boletín " : "los boletines ") + b.refundidos.join(", ") + ".";
+    return out;
   }
   function link(b) { return "https://tramitacion.senado.cl/appsenado/templates/tramitacion/index.php?boletin_ini=" + encodeURIComponent(b.bol); }
 
@@ -433,11 +452,11 @@ var DATA = __DATA__;
   }
 
   function renderReveal(ids) {
-    $("#reveal").innerHTML = '<details><summary>Revelar quién presentó cada proyecto y cómo votó el Senado</summary><div class="scroll"><table class="cmp"><thead><tr><th>Votación</th><th>Presentado por</th><th>Fecha</th><th>Sí · No · Abst.</th><th>Resultado</th><th>Tú</th></tr></thead><tbody>' +
+    $("#reveal").innerHTML = '<details><summary>Revelar quién presentó cada proyecto, cómo votó el Senado y qué pasó después</summary><div class="scroll"><table class="cmp"><thead><tr><th>Votación</th><th>Presentado por</th><th>Fecha</th><th>Sí · No · Abst.</th><th>Resultado</th><th>Qué pasó después</th><th>Tú</th></tr></thead><tbody>' +
       ids.map(function (id) {
         var b = BILLS[id], m = state.ans[id];
         return '<tr><td><a href="' + link(b) + '" target="_blank" rel="noopener">' + esc(b.short) + "</a><br><span class=\"hint\">Boletín " + esc(b.bol) + "</span></td><td>" + esc(author(b)) + '</td><td class="num">' + fecha(b.fecha) +
-          '</td><td class="num">' + b.si + " · " + b.no + " · " + b.ab + "</td><td>" + (passed(b) ? "Aprobado" : "Rechazado") + '</td><td class="v ' + vcls(m) + '">' + vname(m) + "</td></tr>";
+          '</td><td class="num">' + b.si + " · " + b.no + " · " + b.ab + "</td><td>" + (passed(b) ? "Aprobado" : "Rechazado") + "</td><td>" + esc(after(b)) + '</td><td class="v ' + vcls(m) + '">' + vname(m) + "</td></tr>";
       }).join("") + "</tbody></table></div></details>" +
       '<p class="note" style="margin-top:8px">Compara tu voto con quién presentó cada proyecto: si apoyas o rechazas en bloque lo que viene de un mismo sector, la votación ciega lo deja a la vista.</p>';
   }

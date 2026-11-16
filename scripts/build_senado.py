@@ -15,8 +15,17 @@ PICK = [
  ("Educación", "16743", "2025-06-04", "Facilitar la creación de nuevos colegios"),
  ("Educación", "15715", "2023-09-05", "Un solo sistema de evaluación y desarrollo profesional docente"),
  ("Medio ambiente", "16553", "2025-09-30", "Fortalecer la fiscalización de la Superintendencia del Medio Ambiente"),
- ("Transporte", "14532", "2025-05-06", "Más competencia en el cabotaje marítimo"),
+ ("Transporte y telecomunicaciones", "14532", "2025-05-06", "Más competencia en el cabotaje marítimo"),
+ ("Pensiones y trabajo", "14782", "2024-04-02", "Sala cuna para trabajadoras, trabajadores e independientes, con un fondo solidario"),
+ ("Pensiones y trabajo", "15244", "2024-05-07", "Proteger el empleo ante despidos masivos"),
+ ("Salud", "16002", "2023-07-18", "Exigir carnet para comprar bebidas alcohólicas"),
+ ("Seguridad", "14614", "2024-12-03", "Crear el Ministerio de Seguridad Pública"),
+ ("Seguridad", "11915", "2023-03-14", "Narcotráfico y crimen organizado: persecución, bienes incautados y rehabilitación"),
+ ("Economía", "14743", "2023-09-26", "Crear un registro de deuda consolidada"),
+ ("Transporte y telecomunicaciones", "16097", "2024-06-05", "Facilitar la instalación de antenas de telecomunicaciones en zonas rurales"),
 ]
+# orden de las áreas en la página
+PICK.sort(key=lambda x: ["Pensiones y trabajo", "Salud", "Seguridad", "Educación", "Economía", "Medio ambiente", "Transporte y telecomunicaciones"].index(x[0]))
 def G(t, s):
     m = re.search(rf"<{t}>(.*?)</{t}>", s, re.S); return html.unescape(m.group(1)).strip() if m else ""
 def iso(d): return datetime.datetime.strptime(d, "%d/%m/%Y").date().isoformat()
@@ -56,7 +65,7 @@ bills, votes = [], {}
 for area, bol, fecha, short in PICK:
     d = open(f"{RAW}/sen_{bol}.xml", encoding="utf-8", errors="replace").read()
     cands = [v for v in re.findall(r"<votacion>(.*?)</votacion>", d, re.S)
-             if iso(G("FECHA", v)) == fecha and G("TIPOVOTACION", v) in ("Discusión general", "Discusión única")]
+             if iso(G("FECHA", v)) == fecha and G("TIPOVOTACION", v) in ("Discusión general", "Discusión única", "Discusión informe de Comisión Mixta")]
     v = max(cands, key=lambda v: v.count("<VOTO>"))
     t = open(f"{RAW}/tram_{bol}.xml", encoding="utf-8", errors="replace").read()
     ingreso = iso(G("fecha_ingreso", t))
@@ -67,7 +76,9 @@ for area, bol, fecha, short in PICK:
     bills.append({"area": area, "bol": G("boletin", t), "short": short, "titulo": G("titulo", t), "tema": G("TEMA", v),
         "fecha": fecha, "tipo": G("TIPOVOTACION", v), "etapa": G("ETAPA", v), "quorum": G("QUORUM", v),
         "si": int(G("SI", v)), "no": int(G("NO", v)), "ab": int(G("ABSTENCION", v)), "pareo": int(G("PAREO", v) or 0),
-        "ini": ini, "gob": gob, "autores": autores, "ingreso": ingreso, "ley": G("leynro", t), "estado": G("estado", t)})
+        "ini": ini, "gob": gob, "autores": autores, "ingreso": ingreso, "ley": G("leynro", t), "estado": G("estado", t),
+        "publicado": iso(G("diariooficial", t)) if re.match(r"\d{2}/\d{2}/\d{4}", G("diariooficial", t)) else None,
+        "etapaActual": G("etapa", t), "refundidos": [x.replace("*matriz*", "").strip() for x in G("refundidos", t).split("/") if x.strip() and "*matriz*" not in x]})
     for p, sel in re.findall(r"<PARLAMENTARIO>(.*?)</PARLAMENTARIO>\s*<SELECCION>(.*?)</SELECCION>", v, re.S):
         val = {"Si": 1, "No": -1, "Abstencion": 0}.get(sel.strip())  # Pareo: no vota
         key = re.sub(r"\s+", " ", p).strip()
