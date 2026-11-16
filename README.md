@@ -15,6 +15,7 @@ No se usan los datos abiertos de la Cámara: hoy asignan mal los nombres de quie
 ```bash
 python3 scripts/build_senado.py data/raw data/senado.json
 python3 scripts/build_page.py
+node scripts/make_og.js   # solo si cambia la imagen para redes (og.png)
 ```
 
 `build_senado.py` lee los XML del Senado (`votaciones.php`, `tramitacion.php`) y las militancias de la BCN guardadas en `data/raw/`, y escribe `data/senado.json`. `build_page.py` inyecta esos datos en `scripts/template.html` y genera `index.html` (sitio) y `dist/artifact.html` (versión para claude.ai).

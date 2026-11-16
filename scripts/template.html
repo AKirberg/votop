@@ -135,6 +135,13 @@ details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: 
 .v.y { color: var(--good); } .v.n { color: var(--bad); } .v.a, .v.x { color: var(--flat); }
 .empty { color: var(--muted); padding: 12px 0; }
 .note { font-size: 0.84rem; color: var(--muted); max-width: 66ch; }
+.about { gap: 12px; }
+.about > summary { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--ink); cursor: pointer; }
+.about h3 { margin-top: 14px; }
+.about p, .about li { max-width: 66ch; font-size: 0.92rem; }
+.about ul { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.about .body { display: flex; flex-direction: column; gap: 8px; }
+footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; flex-wrap: wrap; }
 </style>
 
 <div class="wrap">
@@ -213,6 +220,38 @@ details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: 
     <div id="reveal"></div>
     <p class="note">La coincidencia muestra lo que votó, no lo que hará. Un voto puede responder a un acuerdo de coalición, por eso conviene mirar también las razones que dio en sala. El partido es la militancia que registra la <a href="https://datos.bcn.cl/" target="_blank" rel="noopener">Biblioteca del Congreso Nacional</a> a la fecha de cada voto; si la BCN no tiene registro para esa fecha, aparece "sin dato". Un pareo es un acuerdo entre dos senadores para no votar y no cuenta en el cálculo.</p>
   </section>
+
+  <details class="panel about" id="como-funciona">
+    <summary>Cómo funciona y de dónde salen los datos</summary>
+    <div class="body">
+      <h3>Qué votaciones aparecen</h3>
+      <p>__NV__ votaciones nominales del Senado del período legislativo 2022–2026, todas sobre el proyecto completo: votación en general, votación única o informe de Comisión Mixta. No se incluyen trámites, como aplazar una votación o devolver un proyecto a comisión, ni votaciones de un solo artículo, porque sin el texto del artículo no se puede votar a ciegas con sentido.</p>
+      <p>Se eligieron votaciones de áreas que calzan con el reparto de impuestos y, cuando fue posible, votaciones divididas. Algunas áreas, como educación, casi no tienen votaciones divididas en el período: también es un dato.</p>
+      <h3>Cómo se calcula la coincidencia</h3>
+      <ul>
+        <li>Votar igual que el senador suma 1; una abstención frente a un voto suma 0,5; votar distinto suma 0.</li>
+        <li>Se promedia dentro de cada área y luego se pondera cada área por los puntos que le diste en el reparto.</li>
+        <li>Solo cuentan las votaciones en que el senador votó. Si votó en menos de la mitad de las que respondiste, queda al final de la lista y marcado.</li>
+      </ul>
+      <h3>Fuentes</h3>
+      <ul>
+        <li>Votos, totales y tramitación: <a href="https://tramitacion.senado.cl/" target="_blank" rel="noopener">datos abiertos del Senado</a>. En cada votación, la suma de votos por senador cuadra con el total oficial.</li>
+        <li>Partido: militancia registrada por la <a href="https://datos.bcn.cl/" target="_blank" rel="noopener">Biblioteca del Congreso Nacional</a> a la fecha de cada voto. Si no hay registro para esa fecha, aparece "sin dato".</li>
+        <li>Títulos breves: los escribimos para que se lean rápido. Debajo de cada uno va el título oficial del proyecto.</li>
+      </ul>
+      <h3>Lo que todavía no incluye</h3>
+      <ul>
+        <li>La Cámara de Diputados. Hoy sus datos abiertos asignan mal los nombres de quienes votan: los totales cuadran, pero atribuyen votos a personas que no eran diputados en esa fecha. Los sumaremos cuando se corrija.</li>
+        <li>Las razones que cada senador dio en sala.</li>
+        <li>Los antecedentes de cada proyecto: qué se votó antes sobre la misma materia.</li>
+      </ul>
+    </div>
+  </details>
+
+  <footer>
+    <span>Datos actualizados el __BUILT__.</span>
+    <a href="https://github.com/AKirberg/votop" target="_blank" rel="noopener">Código y datos en GitHub</a>
+  </footer>
 </div>
 
 <script>

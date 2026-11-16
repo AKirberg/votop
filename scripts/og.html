@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Space+Grotesk:wght@600;700&display=swap">
+<style>
+  :root { --bg: #F4F6FA; --ink: #151B2E; --muted: #5A6379; --accent: #2F4BDB; --soft: #E6EBFF; --good: #1E7B4F; --bad: #B3342E; --line: #DDE2EC; }
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 1200px; height: 630px; background: var(--bg); font-family: Inter, system-ui, sans-serif; color: var(--ink); }
+  .card { position: absolute; inset: 48px; background: #fff; border: 1px solid var(--line); border-radius: 28px; padding: 64px 72px; display: grid; grid-template-columns: 1fr 340px; gap: 56px; align-items: center; }
+  .eyebrow { font-size: 22px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  h1 { font-family: "Space Grotesk", Inter, sans-serif; font-size: 92px; line-height: 1; margin: 18px 0 22px; letter-spacing: -0.02em; }
+  p { font-size: 30px; line-height: 1.35; color: var(--muted); margin: 0; }
+  .url { margin-top: 34px; font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 30px; color: var(--accent); }
+  .votes { display: flex; flex-direction: column; gap: 16px; }
+  .opt { font-size: 28px; font-weight: 600; padding: 18px 22px; border-radius: 14px; border: 2px solid var(--line); }
+  .opt.y { border-color: var(--good); color: var(--good); }
+  .opt.n { color: var(--ink); }
+  .opt.a { color: var(--ink); }
+  .opt.y::before { content: "● "; }
+  .score { margin-top: 10px; background: var(--soft); border-radius: 14px; padding: 18px 22px; display: flex; justify-content: space-between; align-items: baseline; font-size: 24px; font-weight: 600; }
+  .score b { font-family: "Space Grotesk", sans-serif; font-size: 48px; color: var(--accent); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div>
+      <div class="eyebrow">Senado de Chile · 2022–2026</div>
+      <h1>Voto con Contenido</h1>
+      <p>Vota proyectos sin saber quién los presentó y mira con qué senadores coincides.</p>
+      <div class="url">votop.cl</div>
+    </div>
+    <div class="votes" aria-hidden="true">
+      <div class="opt y">A favor</div>
+      <div class="opt n">En contra</div>
+      <div class="opt a">Me abstengo</div>
+      <div class="score">Coincidencia <b>__PCT__</b></div>
+    </div>
+  </div>
+</body>
+</html>
