@@ -211,7 +211,7 @@ details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: 
     </div>
     <div id="res" class="list"></div>
     <div id="reveal"></div>
-    <p class="note">La coincidencia muestra lo que votó, no lo que hará. Un voto puede responder a un acuerdo de coalición, por eso conviene mirar también las razones que dio en sala. El partido es el que hoy informa el Senado; quienes dejaron el cargo en 2026 aparecen sin partido porque la fuente ya no lo publica. Un pareo es un acuerdo entre dos senadores para no votar y no cuenta en el cálculo.</p>
+    <p class="note">La coincidencia muestra lo que votó, no lo que hará. Un voto puede responder a un acuerdo de coalición, por eso conviene mirar también las razones que dio en sala. El partido es la militancia que registra la <a href="https://datos.bcn.cl/" target="_blank" rel="noopener">Biblioteca del Congreso Nacional</a> a la fecha de cada voto; si la BCN no tiene registro para esa fecha, aparece "sin dato". Un pareo es un acuerdo entre dos senadores para no votar y no cuenta en el cálculo.</p>
   </section>
 </div>
 
@@ -392,6 +392,13 @@ var DATA = __DATA__;
     return out;
   }
 
+  function partyTrail(S) {
+    var seen = [];
+    S.pv.forEach(function (p, i) { if (p) seen.push({ p: p, f: BILLS[i].fecha }); });
+    seen.sort(function (a, b) { return a.f < b.f ? -1 : 1; });
+    var seq = seen.reduce(function (acc, x) { if (acc[acc.length - 1] !== x.p) acc.push(x.p); return acc; }, []);
+    return seq.length > 1 ? " Cambió de militancia entre estas votaciones: " + esc(seq.join(" → ")) + "." : "";
+  }
   function card(r, ids) {
     var low = r.voted * 2 < r.total;
     var pct = r.score === null ? null : Math.round(r.score * 100);
@@ -401,8 +408,8 @@ var DATA = __DATA__;
       return "<tr><td>" + esc(BILLS[id].short) + '</td><td class="v ' + vcls(mine) + '">' + vname(mine) + '</td><td class="v ' + vcls(his) + '">' + vname(his) + "</td></tr>";
     }).join("");
     return '<article class="leg"><div class="leg-top"><span class="rank">' + r.rank + "</span><div><h3>" + esc(r.S.n) +
-      '<span class="tag">' + esc(r.S.p || "Sin partido informado") + "</span>" + (low ? '<span class="tag warn">Pocas votaciones</span>' : "") + "</h3>" +
-      '<p class="coh">Votó en ' + r.voted + " de las " + r.total + " votaciones que respondiste" + (r.S.pareo ? " · " + r.S.pareo + (r.S.pareo === 1 ? " pareo" : " pareos") + " en el piloto" : "") + ".</p></div>" +
+      '<span class="tag">' + esc(r.S.p || "Sin dato de partido") + "</span>" + (low ? '<span class="tag warn">Pocas votaciones</span>' : "") + "</h3>" +
+      '<p class="coh">Votó en ' + r.voted + " de las " + r.total + " votaciones que respondiste" + (r.S.pareo ? " · " + r.S.pareo + (r.S.pareo === 1 ? " pareo" : " pareos") + " en el piloto" : "") + "." + partyTrail(r.S) + "</p></div>" +
       (pct === null ? '<div class="score na">Sin votos</div>' : '<div class="score" aria-label="Coincidencia ' + pct + ' por ciento">' + pct + "%</div>") + "</div>" +
       (pct === null ? "" : '<div class="meter" aria-hidden="true"><i style="width:' + pct + '%"></i></div>') +
       (chips ? '<div class="chips">' + chips + "</div>" : "") +

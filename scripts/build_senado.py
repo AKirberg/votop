@@ -26,10 +26,31 @@ def disp(raw):  # "Allende B., Isabel" -> "Isabel Allende B."
     ap = ap.replace(" .", "").strip()
     return f"{nom.strip()} {ap}".strip()
 
-vig = open(f"{RAW}/sen_vig.xml", encoding="utf-8", errors="replace").read()
-PARTY = {}
-for s in re.findall(r"<senador>(.*?)</senador>", vig, re.S):
-    PARTY[(G("PARLAPELLIDOPATERNO", s).strip().lower(), G("PARLNOMBRE", s).split()[0].lower())] = G("PARTIDO", s)
+# Militancias con fecha, de los datos abiertos de la Biblioteca del Congreso Nacional (datos.bcn.cl).
+# El partido de cada senador es el que la BCN registra a la fecha de su voto; si la BCN no tiene registro para esa fecha, queda sin dato.
+import csv, unicodedata
+def fold(s): return unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode().lower()
+SHORT = {"Partido Unión Demócrata Independiente": "UDI", "Partido Renovación Nacional": "RN", "Partido Socialista de Chile": "PS",
+         "Partido Por la Democracia": "PPD", "Partido Demócrata Cristiano": "DC", "Partido Comunista de Chile": "PC",
+         "Partido Evolución Política": "Evópoli", "Federación Regionalista Verde Social": "FRVS", "Revolución Democrática": "RD",
+         "Partido Regionalista de los Independientes": "PRI", "Independiente": "Independiente"}
+MIL = {}
+for f in ("bcn_militancias.csv", "bcn_militancias_extra.csv"):
+    for r in csv.DictReader(open(f"{RAW}/{f}", encoding="utf-8")):
+        if r["partyLabel"]:
+            MIL.setdefault(r["name"], set()).add((r["ini"], r["fin"] or "9999-12-31", SHORT.get(r["partyLabel"], r["partyLabel"])))
+def bcn_person(raw):  # "Castro P., Juan" -> nombre BCN con nombre, apellido paterno e inicial del materno
+    ap, _, nom = raw.partition(",")
+    bits = ap.replace(" .", "").split()
+    pat = " ".join(b for b in bits if not b.endswith(".")); mat = next((b[0] for b in bits if b.endswith(".")), "")
+    first = nom.split()[0] if nom.split() else ""
+    if pat == "Edwards" and first == "Rojo": first = "José Manuel"  # Rojo Edwards figura en la BCN como José Manuel Edwards Silva
+    hits = [k for k in MIL if fold(first) in fold(k) and re.search(rf"\b{re.escape(fold(pat))} {fold(mat)}", fold(k))]
+    return hits[0] if len(hits) == 1 else None
+def party_at(person, date):
+    if not person: return None
+    m = [p for ini, fin, p in MIL[person] if ini <= date <= fin]
+    return sorted(m)[0] if len(set(m)) == 1 else None
 
 bills, votes = [], {}
 for area, bol, fecha, short in PICK:
@@ -57,10 +78,14 @@ for area, bol, fecha, short in PICK:
 
 sens = []
 for raw, vv in votes.items():
-    ap = raw.split(",")[0].split()[0].lower(); nom = raw.split(",")[1].split()[0].lower()
-    sens.append({"n": disp(raw), "p": PARTY.get((ap, nom)), "v": [vv.get(i) if vv.get(i) != "p" else None for i in range(len(bills))],
+    person = bcn_person(raw)
+    pv = [party_at(person, bills[i]["fecha"]) if i in vv else None for i in range(len(bills))]
+    last = max((i for i in vv), key=lambda i: bills[i]["fecha"])
+    sens.append({"n": disp(raw), "p": party_at(person, bills[last]["fecha"]), "pv": pv, "bcn": person,
+                 "v": [vv.get(i) if vv.get(i) != "p" else None for i in range(len(bills))],
                  "pareo": sum(1 for x in vv.values() if x == "p")})
 sens.sort(key=lambda s: s["n"].split(" ", 1)[1])
 json.dump({"bills": bills, "sens": sens, "built": datetime.date.today().isoformat()}, open(OUT, "w", encoding="utf-8"), ensure_ascii=False)
-print(len(bills), "votaciones,", len(sens), "senadores;", sum(1 for s in sens if s["p"]), "con partido según el Senado")
+print(len(bills), "votaciones,", len(sens), "senadores;", sum(1 for s in sens if s["p"]), "con partido según la BCN")
+for s in sens: print(f'{s["n"]:32} {s["p"] or "—":14} {s["bcn"] or "SIN REGISTRO BCN"} {sorted(set(x for x in s["pv"] if x))}')
 for b in bills: print(b["bol"], b["fecha"], f'{b["si"]}-{b["no"]}-{b["ab"]}', b["ini"], b["gob"] or b["autores"][:2], "|", b["tema"][-60:])
