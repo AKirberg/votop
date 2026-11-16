@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Vota proyectos del Senado de Chile sin saber quién los presentó y mira con qué senadores coincides.">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Voto con Contenido</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: una columna angosta, tres pasos con navegación superior; los resultados se leen como un ranking */
+:root {
+  --bg: #F4F6FA; --surface: #FFFFFF; --ink: #151B2E; --muted: #5A6379; --line: #DDE2EC;
+  --accent: #2F4BDB; --accent-soft: #E6EBFF; --accent-ink: #FFFFFF;
+  --good: #1E7B4F; --bad: #B3342E; --flat: #6B7385; --info-bg: #E3F1EA; --info-ink: #17402C;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1424; --surface: #171D32; --ink: #E9ECF5; --muted: #9AA3BA; --line: #2A3350;
+    --accent: #8FA2FF; --accent-soft: #222B55; --accent-ink: #0F1424;
+    --good: #5CC794; --bad: #FF8A80; --flat: #98A1B8; --info-bg: #15342A; --info-ink: #BDE8D2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1424; --surface: #171D32; --ink: #E9ECF5; --muted: #9AA3BA; --line: #2A3350;
+  --accent: #8FA2FF; --accent-soft: #222B55; --accent-ink: #0F1424;
+  --good: #5CC794; --bad: #FF8A80; --flat: #98A1B8; --info-bg: #15342A; --info-ink: #BDE8D2;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); line-height: 1.5;
+  padding-block: 24px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.7rem, 4.5vw, 2.3rem); line-height: 1.1; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.02rem; }
+p { margin: 0; }
+a { color: var(--accent); }
+.lead { color: var(--muted); max-width: 62ch; margin-top: 8px; }
+.banner { background: var(--info-bg); color: var(--info-ink); padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; }
+.banner a { color: inherit; }
+.eyebrow { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.step-btn {
+  font: inherit; text-align: left; background: var(--surface); color: var(--muted); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; min-width: 0;
+}
+.step-btn b { font-family: var(--font-display); font-size: 0.95rem; color: var(--ink); }
+.step-btn span { font-size: 0.78rem; }
+.step-btn[aria-current="step"] { border-color: var(--accent); background: var(--accent-soft); }
+.step-btn[aria-current="step"] span { color: var(--ink); }
+button:focus-visible, input:focus-visible, summary:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 240px; }
+.field label { font-size: 0.82rem; font-weight: 600; }
+select, input[type="text"], input[type="search"] {
+  font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%;
+}
+.hint { font-size: 0.82rem; color: var(--muted); }
+
+.split { display: flex; height: 34px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); font-size: 0.8rem; font-weight: 600; }
+.split > div { display: flex; align-items: center; padding: 0 10px; white-space: nowrap; overflow: hidden; transition: width .25s ease; }
+.split .fixed { background: repeating-linear-gradient(135deg, var(--line) 0 6px, var(--bg) 6px 12px); color: var(--ink); }
+.split .free { background: var(--accent); color: var(--accent-ink); }
+@media (prefers-reduced-motion: reduce) { .split > div { transition: none; } }
+
+.areas { display: flex; flex-direction: column; gap: 4px; }
+.area-row { display: grid; grid-template-columns: 150px 1fr 120px; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.area-row:first-child { border-top: 0; }
+.area-row .nm { font-weight: 600; font-size: 0.92rem; }
+.area-row .nm small { display: block; font-weight: 400; color: var(--muted); font-size: 0.76rem; }
+.area-row input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; }
+.area-row .val { text-align: right; font-variant-numeric: tabular-nums; font-size: 0.85rem; line-height: 1.25; }
+.area-row .val b { font-family: var(--font-display); font-size: 1rem; }
+.area-row .val small { color: var(--muted); display: block; }
+@media (max-width: 560px) {
+  .area-row { grid-template-columns: 1fr 100px; }
+  .area-row input[type="range"] { grid-column: 1 / -1; grid-row: 2; }
+}
+.status { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; background: var(--accent-soft); }
+.pill.ok { background: var(--good); color: var(--accent-ink); }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  font: inherit; font-weight: 600; font-size: 0.9rem; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.area-block { display: flex; flex-direction: column; gap: 10px; }
+.area-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
+.area-head .w { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bill { border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); }
+.bill p { max-width: 66ch; }
+.bill .what { font-size: 0.84rem; color: var(--muted); }
+.opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.opt {
+  font: inherit; font-weight: 600; font-size: 0.88rem; padding: 9px 6px; border-radius: 8px; cursor: pointer;
+  background: var(--surface); color: var(--ink); border: 1.5px solid var(--line);
+}
+.opt[aria-pressed="true"] { border-width: 2px; }
+.opt[data-val="1"][aria-pressed="true"] { border-color: var(--good); color: var(--good); }
+.opt[data-val="-1"][aria-pressed="true"] { border-color: var(--bad); color: var(--bad); }
+.opt[data-val="0"][aria-pressed="true"] { border-color: var(--flat); color: var(--flat); }
+.opt[aria-pressed="true"]::before { content: "● "; }
+
+.toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.toolbar .field { flex: 1 1 220px; }
+.list { display: flex; flex-direction: column; gap: 12px; }
+.leg { border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); }
+.leg-top { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+.rank { font-family: var(--font-display); font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 2ch; }
+.leg-top .score { font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; color: var(--accent); }
+.leg-top .score.na { font-size: 1rem; color: var(--muted); }
+.tag { font-size: 0.74rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); margin-left: 6px; vertical-align: middle; white-space: nowrap; }
+.tag.warn { border-color: var(--bad); color: var(--bad); }
+.meter { height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.meter > i { display: block; height: 100%; background: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 0.78rem; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); font-variant-numeric: tabular-nums; }
+.coh { font-size: 0.85rem; color: var(--muted); }
+details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: var(--accent); }
+.cmp { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-top: 8px; }
+.cmp th, .cmp td { text-align: left; padding: 6px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+.cmp th { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-top: 0; }
+.cmp td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.scroll { overflow-x: auto; max-width: 100%; }
+.v { font-weight: 600; white-space: nowrap; }
+.v.y { color: var(--good); } .v.n { color: var(--bad); } .v.a, .v.x { color: var(--flat); }
+.empty { color: var(--muted); padding: 12px 0; }
+.note { font-size: 0.84rem; color: var(--muted); max-width: 66ch; }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Piloto con datos reales · Senado de Chile, período 2022–2026</div>
+    <h1>Voto con Contenido</h1>
+    <p class="lead">Reparte tu margen de impuestos, vota proyectos sin saber quién los presentó y mira con qué senadores coincides.</p>
+  </header>
+
+  <div class="banner" role="note"><b>Votos reales.</b> 12 votaciones nominales del Senado entre 2022 y 2025, tomadas de los <a href="https://tramitacion.senado.cl/" target="_blank" rel="noopener">datos abiertos del Senado</a> el 16/11/2026. Cada conteo por senador cuadra con el total oficial de la votación.</div>
+
+  <nav class="steps" aria-label="Pasos">
+    <button class="step-btn" data-go="1"><b>1. Reparto</b><span>Tu margen de impuestos</span></button>
+    <button class="step-btn" data-go="2"><b>2. Votación ciega</b><span>Sin saber el autor</span></button>
+    <button class="step-btn" data-go="3"><b>3. Coincidencias</b><span>Con cada senador</span></button>
+  </nav>
+
+  <section class="panel" id="p1" aria-labelledby="h1a">
+    <div>
+      <h2 id="h1a">Reparte el margen que sí puedes decidir</h2>
+      <p class="lead">Una parte del gasto público ya está fijada por ley. Tú decides cómo repartir el resto entre las seis áreas del piloto. Poner más en un área obliga a sacar de otra.</p>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="def">¿Cuánto del gasto está comprometido?</label>
+        <select id="def"></select>
+        <span class="hint" id="defHint"></span>
+      </div>
+      <div class="field" style="flex-basis:200px">
+        <label for="tax">Impuestos que pagas al año (CLP, aprox.)</label>
+        <input type="text" id="tax" inputmode="numeric" autocomplete="off">
+      </div>
+    </div>
+    <div class="split" id="split" role="img" aria-label="División entre gasto comprometido y margen libre"></div>
+    <div class="status">
+      <span>Repartido: <b id="used">0</b> de 100 puntos del margen libre</span>
+      <span class="pill" id="left"></span>
+    </div>
+    <div class="areas" id="areas"></div>
+    <div class="btns">
+      <button class="btn" id="even" type="button">Repartir parejo</button>
+      <button class="btn" id="reset" type="button">Volver al ejemplo</button>
+      <button class="btn primary" id="to2" type="button">Ir a votar</button>
+    </div>
+    <p class="note">Es una simulación. En Chile la mayoría de los impuestos va a una bolsa común y no a un fin específico, y el IVA depende de lo que consumes, no solo de tu ingreso. Las tres cifras de gasto comprometido vienen de fuentes distintas porque cada una define "comprometido" a su manera.</p>
+  </section>
+
+  <section class="panel" id="p2" aria-labelledby="h2a" hidden>
+    <div>
+      <h2 id="h2a">Vota lo mismo que votó el Senado</h2>
+      <p class="lead">Solo aparecen las áreas a las que asignaste margen, las más importantes para ti primero. No se muestra quién presentó el proyecto, la fecha ni el resultado.</p>
+    </div>
+    <div id="vote"></div>
+    <div class="status">
+      <span id="prog"></span>
+      <div class="btns">
+        <button class="btn" id="back1" type="button">Volver al reparto</button>
+        <button class="btn primary" id="to3" type="button">Ver coincidencias</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p3" aria-labelledby="h3a" hidden>
+    <div>
+      <h2 id="h3a">Con quién coincides</h2>
+      <p class="lead">El porcentaje pesa cada área según el margen que le diste y se calcula solo con las votaciones en que el senador votó. Votar igual suma 1, una abstención frente a un voto suma 0,5 y votar distinto suma 0.</p>
+    </div>
+    <div class="toolbar">
+      <div class="field">
+        <label for="q">Buscar senador o partido</label>
+        <input type="search" id="q" autocomplete="off" placeholder="Ej.: Provoste, UDI">
+      </div>
+      <button class="btn" id="all" type="button"></button>
+    </div>
+    <div id="res" class="list"></div>
+    <div id="reveal"></div>
+    <p class="note">La coincidencia muestra lo que votó, no lo que hará. Un voto puede responder a un acuerdo de coalición, por eso conviene mirar también las razones que dio en sala. El partido es el que hoy informa el Senado; quienes dejaron el cargo en 2026 aparecen sin partido porque la fuente ya no lo publica. Un pareo es un acuerdo entre dos senadores para no votar y no cuenta en el cálculo.</p>
+  </section>
+</div>
+
+<script>
+var DATA = {"bills": [{"area": "Pensiones y trabajo", "bol": "15480-13", "short": "Reforma de pensiones: nuevo sistema mixto y seguro social", "titulo": "Crea un nuevo Sistema Mixto de Pensiones y un Seguro Social en el pilar contributivo, mejora la Pensión Garantizada Universal y establece beneficios y modificaciones regulatorias que indica", "tema": "Proyecto de ley, en segundo trámite constitucional, que crea un nuevo Sistema Mixto de Pensiones y un Seguro Social en el pilar contributivo, mejora la Pensión Garantizada Universal y establece beneficios y modificaciones regulatorias que indica,   (Boletín N° 15.480-13).En votación en general el proyecto de ley y los artículos que no fueron objeto de indicaciones o solicitudes de votaciones separadas, resultan aprobados.", "fecha": "2025-01-27", "tipo": "Discusión general", "etapa": "Segundo trámite constitucional", "quorum": "Q.C.", "si": 40, "no": 7, "ab": 0, "pareo": 0, "ini": "Mensaje", "gob": "Gobierno de Gabriel Boric", "autores": [], "ingreso": "2022-11-07", "ley": "Ley N° 21.735", "estado": "Publicado"}, {"area": "Pensiones y trabajo", "bol": "15864-13", "short": "Alza del ingreso mínimo y ampliación de la asignación familiar", "titulo": "Reajusta el monto del ingreso mínimo mensual, aumenta el universo de beneficiarios y beneficiarias de la asignación familiar y maternal, y extiende el ingreso mínimo garantizado y el subsidio temporal a las micro, pequeñas y medianas empresas en la forma que indica", "tema": "Votación en  general del proyecto de ley, en segundo trámite constitucional, que reajusta el monto del ingreso mínimo mensual, aumenta el universo de beneficiarios y beneficiarias de la asignación familiar y maternal, y extiende el ingreso mínimo garantizado y el subsidio temporal a las micro, pequeñas y medianas empresas en la forma que indica, con informe de las Comisiones de Hacienda y de Trabajo y Previsión Social, unidas. (Boletín N° 15.864-13)", "fecha": "2023-05-17", "tipo": "Discusión general", "etapa": "Segundo trámite constitucional", "quorum": "Mayoría simple", "si": 19, "no": 5, "ab": 9, "pareo": 0, "ini": "Mensaje", "gob": "Gobierno de Gabriel Boric", "autores": [], "ingreso": "2023-04-24", "ley": "Ley N° 21.578", "estado": "Publicado"}, {"area": "Pensiones y trabajo", "bol": "17080-10", "short": "Convenio 155 de la OIT sobre seguridad y salud de los trabajadores", "titulo": "Aprueba el Convenio N° 155, sobre Seguridad y Salud de los Trabajadores, adoptado en la 67a. Conferencia General de la Organización Internacional del Trabajo, el 22 de junio de 1981", "tema": "Proyecto de acuerdo, en segundo trámite constitucional, que aprueba el Convenio N° 155, sobre Seguridad y Salud de los Trabajadores, adoptado en la 67a. Conferencia General de la Organización Internacional del Trabajo, el 22 de junio de 1981, (Boletín N° 17.080-10). APROBADO.", "fecha": "2025-03-05", "tipo": "Discusión general", "etapa": "Segundo trámite constitucional", "quorum": "Q.C.", "si": 26, "no": 8, "ab": 3, "pareo": 0, "ini": "Mensaje", "gob": "Gobierno de Gabriel Boric", "autores": [], "ingreso": "2024-09-02", "ley": "D.S N° 4", "estado": "Publicado"}, {"area": "Salud", "bol": "12662-11", "short": "Seguro de salud catastrófico en Fonasa (libre elección)", "titulo": "Crea el Sistema de Acceso Priorizado a determinadas intervenciones sanitarias", "tema": "Rechazo de la idea de legislar del proyecto de ley, en segundo trámite constitucional, que crea el Seguro de Salud Catastrófico a través de una cobertura financiera especial en la modalidad de atención de libre elección de FONASA (Boletín N° 12.662-11)", "fecha": "2022-06-01", "tipo": "Discusión general", "etapa": "Segundo trámite constitucional", "quorum": "Q.C.", "si": 21, "no": 18, "ab": 0, "pareo": 0, "ini": "Mensaje", "gob": "Gobierno de Sebastián Piñera", "autores": [], "ingreso": "2019-05-27", "ley": "Ley N° 21.736", "estado": "Publicado"}, {"area": "Salud", "bol": "14211-11", "short": "Prohibir informar las deudas contraídas por atenciones de salud", "titulo": "Proyecto de ley que prohíbe informar las deudas contraídas para financiar atenciones de salud.", "tema": "Aprobación de las enmiendas introducidas por la Cámara de Diputados al proyecto de ley, en tercer trámite constitucional, que prohíbe informar las deudas contraídas para financiar atenciones de salud. (Boletín N° 14.211-11).", "fecha": "2022-10-05", "tipo": "Discusión única", "etapa": "Tercer trámite constitucional", "quorum": "Mayoría simple", "si": 18, "no": 4, "ab": 1, "pareo": 2, "ini": "Moción", "gob": null, "autores": ["Guido Girardi Lavín", "Carolina Goic Boroevic", "Jaime Quintana Leal", "Rabindranath Quinteros Lara"], "ingreso": "2021-04-28", "ley": "Ley N° 21.504", "estado": "Publicado"}, {"area": "Seguridad", "bol": "14870-25", "short": "Más protección legal para policías y Gendarmería", "titulo": "Modifica textos legales que indica para fortalecer y proteger el ejercicio de la función policial y de Gendarmería de Chile", "tema": "Proyecto de ley, en segundo trámite constitucional, que modifica textos legales que indica para fortalecer proteger el ejercicio de la función policial y de Gendarmería de Chile (Boletín N° 14.870-25).EN GENERAL.APROBADO.", "fecha": "2023-04-04", "tipo": "Discusión general", "etapa": "Segundo trámite constitucional", "quorum": "Mayoría simple", "si": 40, "no": 5, "ab": 0, "pareo": 0, "ini": "Moción", "gob": null, "autores": ["Jorge Alessandri Vergara", "Cristián Araya Lerdo de Tejada", "Juan Antonio Coloma Alamos", "Felipe Donoso Castro", "Henry Leal Bizama", "Andrés Longton Herrera", "Guillermo Ramírez Diez", "Diego Schalper Sepúlveda", "Stephan Schubert Rubio"], "ingreso": "2022-03-23", "ley": "Ley N° 21.560", "estado": "Publicado"}, {"area": "Seguridad", "bol": "14015-25", "short": "Cárcel por usurpación de inmuebles y detención más fácil de ocupantes", "titulo": "Regula los delitos de ocupaciones ilegales de inmuebles, fija nuevas penas y formas comisivas e incorpora mecanismos eficientes de restitución", "tema": "Aprobación en general del proyecto de ley, en primer trámite constitucional, que modifica el Código Penal para castigar con penas privativas de libertad el delito de usurpación, ampliar el período de flagrancia y facilitar la detención de los ocupantes, en la forma que se indica, con informe de la Comisión de Seguridad Pública (Boletines Nos 14.015-25 y 13.657-07, refundidos)", "fecha": "2022-08-09", "tipo": "Discusión general", "etapa": "Primer trámite constitucional", "quorum": "Mayoría simple", "si": 28, "no": 11, "ab": 2, "pareo": 0, "ini": "Moción", "gob": null, "autores": ["Felipe Kast Sommerhoff", "Marcela Sabat Fernández", "Ena Von Baer Jahn"], "ingreso": "2021-01-19", "ley": "Ley N° 21.633", "estado": "Publicado"}, {"area": "Seguridad", "bol": "16132-06", "short": "Prevención del delito y apoyo a víctimas a cargo de los gobiernos regionales", "titulo": "Consagra funciones en materia de prevención social, situacional y comunitaria del delito, y de apoyo y asistencia a víctimas, a los gobiernos regionales", "tema": "Proyecto de ley, en segundo trámite constitucional, que consagra funciones en materia de prevención social, situacional y comunitaria del delito, y de apoyo y asistencia a víctimas, a los gobiernos regionales, con informe de la Comisión de Gobierno, Descentralización y Regionalización. Discusión en general (Boletín Nº 16.132-06)", "fecha": "2025-09-09", "tipo": "Discusión general", "etapa": "Segundo trámite constitucional", "quorum": "Q.C.", "si": 24, "no": 6, "ab": 12, "pareo": 0, "ini": "Mensaje", "gob": "Gobierno de Gabriel Boric", "autores": [], "ingreso": "2023-08-01", "ley": "", "estado": "En tramitación"}, {"area": "Educación", "bol": "16743-04", "short": "Facilitar la creación de nuevos colegios", "titulo": "Modifica diversos cuerpos legales, con el objeto de facilitar la creación de nuevos establecimientos educacionales", "tema": "Proyecto de ley, en primer trámite constitucional, que modifica diversos cuerpos legales, con el objeto de facilitar la creación de nuevos establecimientos educacionales,  (discusión en general). (Boletín N° 16.743-04).APROBADO.", "fecha": "2025-06-04", "tipo": "Discusión general", "etapa": "Primer trámite constitucional", "quorum": "Mayoría simple", "si": 32, "no": 0, "ab": 5, "pareo": 1, "ini": "Moción", "gob": null, "autores": ["Carmen Gloria Aravena Acuña", "José García Ruminot", "Paulina Núñez Urrutia", "Gustavo Sanhueza Dueñas", "Matías Walker Prieto"], "ingreso": "2024-04-09", "ley": "", "estado": "En tramitación"}, {"area": "Educación", "bol": "15715-04", "short": "Un solo sistema de evaluación y desarrollo profesional docente", "titulo": "Consolida el sistema de reconocimiento y promoción del desarrollo profesional docente como único sistema general de evaluación y fortalece los procesos de inducción y acompañamiento", "tema": "Proyecto de ley, en segundo trámite constitucional, que consolida el sistema de reconocimiento y promoción del desarrollo profesional docente como único sistema general de evaluación y fortalece los procesos de inducción y acompañamiento(Boletín N° 15.715-04). APROBADO EN GENERAL.", "fecha": "2023-09-05", "tipo": "Discusión general", "etapa": "Segundo trámite constitucional", "quorum": "Mayoría simple", "si": 31, "no": 2, "ab": 1, "pareo": 3, "ini": "Mensaje", "gob": "Gobierno de Gabriel Boric", "autores": [], "ingreso": "2023-01-31", "ley": "Ley N° 21.625", "estado": "Publicado"}, {"area": "Medio ambiente", "bol": "16553-12", "short": "Fortalecer la fiscalización de la Superintendencia del Medio Ambiente", "titulo": "Fortalece y mejora la eficacia de la fiscalización y el cumplimiento de la regulación ambiental a cargo de la Superintendencia del Medio Ambiente, y regula otras materias que indica", "tema": "Proyecto de ley, en segundo trámite constitucional, que fortalece y mejora la eficacia de la fiscalización y el cumplimiento de la regulación ambiental a cargo de la Superintendencia del Medio Ambiente, y regula otras materias que indica, con informe de la Comisión de Medio Ambiente, Cambio Climático y Bienes Nacionales. (discusión en general). (Boletín Nº 16.553-12)", "fecha": "2025-09-30", "tipo": "Discusión general", "etapa": "Segundo trámite constitucional", "quorum": "Cuatro séptimos Q.C.", "si": 25, "no": 6, "ab": 8, "pareo": 0, "ini": "Mensaje", "gob": "Gobierno de Gabriel Boric", "autores": [], "ingreso": "2024-01-10", "ley": "", "estado": "En tramitación"}, {"area": "Transporte", "bol": "14532-15", "short": "Más competencia en el cabotaje marítimo", "titulo": "Modifica la Ley de Fomento a la Marina Mercante y la Ley de Navegación, para fomentar la competencia en el mercado del cabotaje marítimo", "tema": "Proyecto de ley, en segundo trámite constitucional, que modifica la Ley de Fomento a la Marina Mercante y la Ley de Navegación, para fomentar la competencia en el mercado del cabotaje marítimo, (Boletín Nº 14.532-15). APROBADO EN GENERAL.", "fecha": "2025-05-06", "tipo": "Discusión general", "etapa": "Segundo trámite constitucional", "quorum": "Mayoría simple", "si": 33, "no": 7, "ab": 5, "pareo": 0, "ini": "Mensaje", "gob": "Gobierno de Sebastián Piñera", "autores": [], "ingreso": "2021-08-17", "ley": "Ley N° 21.774", "estado": "Publicado"}], "sens": [{"n": "Isabel Allende B.", "p": null, "v": [1, 1, 1, null, null, 1, -1, null, null, null, null, null], "pareo": 1}, {"n": "Juan Antonio Coloma C.", "p": null, "v": [1, 0, -1, 1, -1, 1, 1, 0, 1, 1, 0, 1], "pareo": 0}, {"n": "Pedro Araya G.", "p": "P.P.D.", "v": [1, 1, null, null, null, 1, 0, 1, 1, null, 1, 1], "pareo": 0}, {"n": "Karim Bianchi R.", "p": "Independiente", "v": [1, 1, 1, null, 1, 1, 1, 1, null, -1, null, null], "pareo": 0}, {"n": "Fabiola Campillai R.", "p": "Independiente", "v": [null, 1, 1, -1, null, -1, -1, 1, 0, 1, 1, 0], "pareo": 0}, {"n": "Loreto Carvajal A.", "p": "P.P.D.", "v": [1, 1, 1, null, 1, 1, 0, null, null, 1, null, -1], "pareo": 0}, {"n": "Juan Castro P.", "p": "P.S.", "v": [null, -1, 1, 1, 1, 1, 1, null, 1, 1, 1, 1], "pareo": 0}, {"n": "Francisco Chahuán C.", "p": null, "v": [1, null, 1, 1, 1, 1, 1, 1, null, 1, 1, -1], "pareo": 0}, {"n": "Luciano Cruz-Coke C.", "p": "Evópoli", "v": [1, 0, 0, null, null, 1, 1, null, 1, null, 0, 1], "pareo": 0}, {"n": "Tomás De Rementería V.", "p": null, "v": [null, null, null, null, null, null, null, 1, null, null, 1, 0], "pareo": 0}, {"n": "Alfonso De Urresti L.", "p": null, "v": [1, 1, 1, -1, null, null, -1, 0, 1, 1, 1, 1], "pareo": 1}, {"n": "Rojo Edwards", "p": "Independiente", "v": [-1, -1, null, 1, null, 1, 1, -1, 1, 0, null, null], "pareo": 0}, {"n": "Luz Eliana Ebensperger O.", "p": null, "v": [1, 0, -1, 1, -1, 1, 1, null, 1, 1, 0, 1], "pareo": 0}, {"n": "Alvaro Elizalde S.", "p": null, "v": [null, null, null, -1, 1, 1, null, null, null, null, null, null], "pareo": 0}, {"n": "Fidel Espinoza S.", "p": "P.S.", "v": [1, null, null, -1, null, 1, null, 1, 1, 1, 1, 1], "pareo": 0}, {"n": "Iván Flores G.", "p": "P.D.C.", "v": [1, 1, null, null, 1, 1, null, 1, 1, 1, null, 1], "pareo": 0}, {"n": "Sergio Gahona S.", "p": "U.D.I.", "v": [1, null, -1, 1, null, null, 1, 1, null, null, 0, 1], "pareo": 1}, {"n": "Rodrigo Galilea V.", "p": null, "v": [1, 0, 1, 1, null, 1, 1, 1, 1, null, 1, null], "pareo": 0}, {"n": "José García R.", "p": null, "v": [1, 0, 1, 1, null, 1, 1, 1, 1, 1, 1, 1], "pareo": 0}, {"n": "Carmen Gloria Aravena A.", "p": null, "v": [-1, -1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1], "pareo": 0}, {"n": "Francisco Huenchumilla J.", "p": "P.D.C.", "v": [1, null, 1, -1, null, 1, null, 1, null, null, null, 1], "pareo": 0}, {"n": "Carlos Ignacio Kuschel S.", "p": "R.N.", "v": [-1, -1, 1, null, null, 1, 1, -1, 1, -1, -1, -1], "pareo": 0}, {"n": "Juan Ignacio Latorre R.", "p": null, "v": [1, 1, 1, -1, 1, -1, -1, 1, 0, 1, 1, 1], "pareo": 0}, {"n": "María José Gatica B.", "p": "R.N.", "v": [-1, null, null, 1, 1, null, 1, -1, null, 1, null, -1], "pareo": 0}, {"n": "Manuel José Ossandón I.", "p": "R.N.", "v": [1, null, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "pareo": 0}, {"n": "Felipe Kast S.", "p": null, "v": [1, null, null, 1, null, 1, 1, 0, null, null, null, 1], "pareo": 0}, {"n": "Sebastián Keitel B.", "p": "Evópoli", "v": [1, null, 0, 1, 1, null, 1, 0, 1, 1, 1, 1], "pareo": 0}, {"n": "Alejandro Kusanovic G.", "p": "Independiente", "v": [-1, -1, -1, 1, null, 1, 1, -1, null, 1, -1, -1], "pareo": 0}, {"n": "Ricardo Lagos W.", "p": null, "v": [1, 1, null, null, null, 1, null, 1, 1, null, 1, 1], "pareo": 1}, {"n": "Juan Luis Castro G.", "p": "P.S.", "v": [1, null, 1, -1, null, 1, null, null, null, null, 1, 1], "pareo": 0}, {"n": "Javier Macaya D.", "p": "U.D.I.", "v": [1, null, -1, null, null, 1, 1, 0, 1, 1, -1, 1], "pareo": 0}, {"n": "José Miguel Durana S.", "p": null, "v": [-1, 0, -1, 1, 0, 1, 1, 1, 1, null, -1, 0], "pareo": 0}, {"n": "José Miguel Insulza S.", "p": null, "v": [1, 1, 1, -1, 1, 1, -1, 0, 1, 1, null, 1], "pareo": 0}, {"n": "Iván Moreira B.", "p": "U.D.I.", "v": [1, null, 1, 1, null, 1, 1, 1, 1, null, 0, 0], "pareo": 0}, {"n": "Daniel Núñez A.", "p": "P.C", "v": [1, 1, 1, -1, null, -1, -1, 1, 0, 1, 1, 1], "pareo": 0}, {"n": "Paulina Núñez U.", "p": "R.N.", "v": [1, null, null, null, null, 1, 1, null, null, null, 1, null], "pareo": 0}, {"n": "Ximena Ordenes N.", "p": "Independiente", "v": [1, 1, null, -1, null, 1, -1, 0, 1, null, 1, 1], "pareo": 0}, {"n": "Claudia Pascual G.", "p": "P.C", "v": [1, 1, 1, -1, 1, -1, -1, 1, 0, 1, 1, 1], "pareo": 0}, {"n": "Rafael Prohens E.", "p": null, "v": [1, 0, null, 1, null, 1, 1, -1, 1, null, -1, 1], "pareo": 1}, {"n": "Yasna Provoste C.", "p": "P.D.C.", "v": [1, 1, 1, -1, 1, 1, -1, 1, 1, 1, 1, 1], "pareo": 0}, {"n": "Kenneth Pugh O.", "p": null, "v": [-1, 0, -1, 1, null, 1, null, 0, 1, 1, 0, -1], "pareo": 1}, {"n": "Jaime Quintana L.", "p": null, "v": [1, null, 1, -1, 1, 1, -1, 1, 1, 1, 1, 1], "pareo": 0}, {"n": "Ximena Rincón G.", "p": null, "v": [null, null, 1, 1, null, 1, 1, 0, 1, 1, null, 1], "pareo": 0}, {"n": "Gastón Saavedra C.", "p": "P.S.", "v": [1, 1, 1, -1, null, 1, 1, null, 1, 1, 1, 1], "pareo": 0}, {"n": "David Sandoval P.", "p": null, "v": [1, null, 0, 1, -1, 1, 1, 0, null, 1, 0, 0], "pareo": 0}, {"n": "Gustavo Sanhueza D.", "p": "U.D.I.", "v": [1, 0, null, 1, -1, 1, 1, -1, 1, 1, -1, 1], "pareo": 0}, {"n": "Alejandra Sepúlveda O.", "p": "Independiente", "v": [1, 1, 1, -1, 1, 1, null, 1, 0, 1, 1, 1], "pareo": 0}, {"n": "Jorge Soria Q.", "p": null, "v": [1, null, null, -1, 1, null, null, null, null, null, null, null], "pareo": 0}, {"n": "Enrique Van Rysselberghe H.", "p": null, "v": [1, null, -1, null, null, 1, 1, 0, 1, 1, 0, 1], "pareo": 0}, {"n": "Esteban Velásquez N.", "p": "F.R.E.V.S.", "v": [1, 1, 1, -1, null, -1, -1, 1, 1, 1, 1, 1], "pareo": 0}, {"n": "Paulina Vodanovic R.", "p": "P.S.", "v": [1, 1, null, null, null, null, null, 1, 1, null, 1, -1], "pareo": 0}, {"n": "Matías Walker P.", "p": "Demócratas", "v": [1, 1, 1, -1, 1, 1, 1, 1, 1, 1, null, 1], "pareo": 0}], "built": "2026-11-16"};
+</script>
+<script>
+(function () {
+  "use strict";
+
+  var BILLS = DATA.bills, SENS = DATA.sens;
+  var AREAS = [];
+  BILLS.forEach(function (b) { if (AREAS.indexOf(b.area) < 0) AREAS.push(b.area); });
+  var DEFS = [
+    { id: "prop", pct: 60, label: "Propuesta inicial: 60% comprometido", hint: "Cifra redonda de partida del proyecto." },
+    { id: "dipres", pct: 63.4, label: "Dipres: 63,4% por leyes permanentes", hint: "Gasto por leyes permanentes sobre el gasto neto de las partidas fiscales (datos a 2025)." },
+    { id: "lyd", pct: 73, label: "Libertad y Desarrollo: 73%", hint: "Gasto por leyes permanentes sobre el gasto total del presupuesto 2026." },
+    { id: "cep", pct: 83, label: "CEP Chile: 83%", hint: "Gasto comprometido por leyes permanentes; máximo de la serie en 2026 y se mantiene en 2027." }
+  ];
+  var EXAMPLE_W = [25, 20, 20, 15, 10, 10];
+  var SHOW = 10;
+
+  var state = { def: "dipres", tax: 2400000, w: EXAMPLE_W.slice(0, AREAS.length), ans: {}, q: "", all: false };
+  var $ = function (s) { return document.querySelector(s); };
+  var nf = new Intl.NumberFormat("es-CL", { maximumFractionDigits: 0 });
+  var pf = function (n) { return n.toLocaleString("es-CL", { maximumFractionDigits: 1 }); };
+  var clp = function (n) { return "$" + nf.format(Math.round(n)); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var sum = function (a) { return a.reduce(function (s, x) { return s + x; }, 0); };
+  var defOf = function () { return DEFS.filter(function (d) { return d.id === state.def; })[0]; };
+  var billsIn = function (a) { return BILLS.map(function (b, i) { return i; }).filter(function (i) { return BILLS[i].area === a; }); };
+  var fecha = function (iso) { var p = iso.split("-"); return Number(p[2]) + "/" + Number(p[1]) + "/" + p[0]; };
+  var norm = function (s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); };
+
+  function whatVoted(b) {
+    if (/^Aprobaci[oó]n de las enmiendas/i.test(b.tema)) return "Votación única: aprobar los cambios que hizo la Cámara de Diputados al proyecto.";
+    if (b.tipo === "Discusión general") return "Votación en general: aprobar la idea de legislar este proyecto.";
+    return "Votación única del proyecto.";
+  }
+  function passed(b) { return !/^Rechazo/i.test(b.tema); }
+  function author(b) {
+    if (b.ini === "Mensaje") return b.gob + " (mensaje, " + b.ingreso.slice(0, 4) + ")";
+    var n = b.autores.length;
+    return "Moción de " + b.autores.slice(0, 3).join(", ") + (n > 3 ? " y " + (n - 3) + " más" : "") + " (" + b.ingreso.slice(0, 4) + ")";
+  }
+  function link(b) { return "https://tramitacion.senado.cl/appsenado/templates/tramitacion/index.php?boletin_ini=" + encodeURIComponent(b.bol); }
+
+  /* ---------- Paso 1 ---------- */
+  function buildStep1() {
+    $("#def").innerHTML = DEFS.map(function (d) {
+      return '<option value="' + d.id + '"' + (d.id === state.def ? " selected" : "") + ">" + d.label + "</option>";
+    }).join("");
+    $("#tax").value = nf.format(state.tax);
+    $("#areas").innerHTML = AREAS.map(function (a, i) {
+      var n = billsIn(a).length;
+      return '<div class="area-row"><label class="nm" for="r' + i + '">' + a + "<small>" + n + (n === 1 ? " votación" : " votaciones") + "</small></label>" +
+        '<input type="range" id="r' + i + '" min="0" max="100" step="1" value="' + state.w[i] + '" data-i="' + i + '">' +
+        '<div class="val" id="v' + i + '"></div></div>';
+    }).join("");
+    updateStep1();
+  }
+  function updateStep1() {
+    var d = defOf(), fixed = d.pct, free = 100 - fixed;
+    $("#defHint").textContent = d.hint;
+    $("#split").innerHTML =
+      '<div class="fixed" style="width:' + fixed + '%">Comprometido ' + pf(fixed) + "%</div>" +
+      '<div class="free" style="width:' + free + '%">Tu margen ' + pf(free) + "%</div>";
+    var used = sum(state.w), left = 100 - used;
+    $("#used").textContent = used;
+    var pill = $("#left");
+    pill.textContent = left === 0 ? "Todo repartido" : "Te quedan " + left + " puntos";
+    pill.className = "pill" + (left === 0 ? " ok" : "");
+    AREAS.forEach(function (a, i) {
+      var ofTotal = state.w[i] * free / 100;
+      $("#v" + i).innerHTML = "<b>" + state.w[i] + " pts</b><small>" + pf(ofTotal) + "% · " + clp(state.tax * ofTotal / 100) + "</small>";
+      $("#r" + i).value = state.w[i];
+    });
+  }
+  $("#areas").addEventListener("input", function (e) {
+    var i = Number(e.target.getAttribute("data-i"));
+    if (isNaN(i)) return;
+    var others = sum(state.w) - state.w[i];
+    state.w[i] = Math.min(Number(e.target.value), 100 - others);
+    updateStep1();
+  });
+  $("#def").addEventListener("change", function (e) { state.def = e.target.value; updateStep1(); });
+  $("#tax").addEventListener("input", function (e) {
+    var n = parseInt(e.target.value.replace(/\D/g, ""), 10);
+    state.tax = isNaN(n) ? 0 : n;
+    updateStep1();
+  });
+  $("#tax").addEventListener("blur", function (e) { e.target.value = nf.format(state.tax); });
+  $("#even").addEventListener("click", function () {
+    var base = Math.floor(100 / AREAS.length), rest = 100 - base * AREAS.length;
+    state.w = AREAS.map(function (_, i) { return base + (i < rest ? 1 : 0); });
+    updateStep1();
+  });
+  $("#reset").addEventListener("click", function () { state.w = EXAMPLE_W.slice(0, AREAS.length); updateStep1(); });
+  $("#to2").addEventListener("click", function () { go(2); });
+
+  /* ---------- Paso 2 ---------- */
+  function activeAreas() {
+    return AREAS.map(function (a, i) { return { a: a, w: state.w[i] }; })
+      .filter(function (x) { return x.w > 0; })
+      .sort(function (x, y) { return y.w - x.w; });
+  }
+  function renderVote() {
+    var act = activeAreas(), html = "", n = 0;
+    if (!act.length) {
+      $("#vote").innerHTML = '<p class="empty">Aún no asignaste margen a ninguna área. Vuelve al reparto para elegir qué te importa.</p>';
+      updateProgress();
+      return;
+    }
+    act.forEach(function (x) {
+      html += '<section class="area-block" style="margin-bottom:20px"><div class="area-head"><h3>' + esc(x.a) + '</h3><span class="w">Tu prioridad: ' + x.w + " de 100 puntos</span></div>";
+      billsIn(x.a).forEach(function (id) {
+        n++;
+        var b = BILLS[id], cur = state.ans[id];
+        var btn = function (val, label) {
+          return '<button type="button" class="opt" data-bill="' + id + '" data-val="' + val + '" aria-pressed="' + (cur === val) + '">' + label + "</button>";
+        };
+        html += '<article class="bill" aria-label="Votación ' + n + '"><div><div class="eyebrow">Votación ' + n + "</div><h3>" + esc(b.short) + "</h3></div>" +
+          "<p>" + esc(b.titulo) + '.</p><p class="what">' + whatVoted(b) + "</p>" +
+          '<div class="opts" role="group" aria-label="Tu voto">' + btn(1, "A favor") + btn(-1, "En contra") + btn(0, "Me abstengo") + "</div></article>";
+      });
+      html += "</section>";
+    });
+    $("#vote").innerHTML = html;
+    updateProgress();
+  }
+  function answeredIds() {
+    var ids = [];
+    activeAreas().forEach(function (x) { billsIn(x.a).forEach(function (id) { if (state.ans[id] !== undefined) ids.push(id); }); });
+    return ids;
+  }
+  function updateProgress() {
+    var total = sum(activeAreas().map(function (x) { return billsIn(x.a).length; })), done = answeredIds().length;
+    $("#prog").innerHTML = "Respondidas <b>" + done + "</b> de " + total;
+    $("#to3").disabled = done === 0;
+  }
+  $("#vote").addEventListener("click", function (e) {
+    var b = e.target.closest(".opt");
+    if (!b) return;
+    var id = Number(b.getAttribute("data-bill")), val = Number(b.getAttribute("data-val"));
+    state.ans[id] = val;
+    var sibs = b.parentNode.querySelectorAll(".opt");
+    for (var k = 0; k < sibs.length; k++) sibs[k].setAttribute("aria-pressed", sibs[k] === b ? "true" : "false");
+    updateProgress();
+  });
+  $("#back1").addEventListener("click", function () { go(1); });
+  $("#to3").addEventListener("click", function () { go(3); });
+
+  /* ---------- Paso 3 ---------- */
+  function agree(a, b) { return a === b ? 1 : (a === 0 || b === 0 ? 0.5 : 0); }
+  var vname = function (v) { return v === 1 ? "A favor" : v === -1 ? "En contra" : v === 0 ? "Abstención" : "No votó"; };
+  var vcls = function (v) { return v === 1 ? "y" : v === -1 ? "n" : v === 0 ? "a" : "x"; };
+
+  function compute(ids) {
+    var out = SENS.map(function (S) {
+      var num = 0, den = 0, per = [], voted = 0;
+      activeAreas().forEach(function (x) {
+        var got = billsIn(x.a).filter(function (id) { return state.ans[id] !== undefined && S.v[id] !== null; });
+        voted += got.length;
+        if (got.length) {
+          var a = sum(got.map(function (id) { return agree(state.ans[id], S.v[id]); })) / got.length;
+          num += x.w * a; den += x.w;
+          per.push({ a: x.a, s: a });
+        }
+      });
+      return { S: S, score: den ? num / den : null, per: per, voted: voted, total: ids.length };
+    });
+    out.sort(function (a, b) {
+      var la = a.voted * 2 < a.total ? 1 : 0, lb = b.voted * 2 < b.total ? 1 : 0;
+      var sa = a.score === null ? -1 : a.score, sb = b.score === null ? -1 : b.score;
+      return la - lb || sb - sa || b.voted - a.voted || a.S.n.localeCompare(b.S.n, "es");
+    });
+    out.forEach(function (r, i) { r.rank = i + 1; });
+    return out;
+  }
+
+  function card(r, ids) {
+    var low = r.voted * 2 < r.total;
+    var pct = r.score === null ? null : Math.round(r.score * 100);
+    var chips = r.per.map(function (p) { return '<span class="chip">' + esc(p.a) + " " + Math.round(p.s * 100) + "%</span>"; }).join("");
+    var rows = ids.map(function (id) {
+      var mine = state.ans[id], his = r.S.v[id];
+      return "<tr><td>" + esc(BILLS[id].short) + '</td><td class="v ' + vcls(mine) + '">' + vname(mine) + '</td><td class="v ' + vcls(his) + '">' + vname(his) + "</td></tr>";
+    }).join("");
+    return '<article class="leg"><div class="leg-top"><span class="rank">' + r.rank + "</span><div><h3>" + esc(r.S.n) +
+      '<span class="tag">' + esc(r.S.p || "Sin partido informado") + "</span>" + (low ? '<span class="tag warn">Pocas votaciones</span>' : "") + "</h3>" +
+      '<p class="coh">Votó en ' + r.voted + " de las " + r.total + " votaciones que respondiste" + (r.S.pareo ? " · " + r.S.pareo + (r.S.pareo === 1 ? " pareo" : " pareos") + " en el piloto" : "") + ".</p></div>" +
+      (pct === null ? '<div class="score na">Sin votos</div>' : '<div class="score" aria-label="Coincidencia ' + pct + ' por ciento">' + pct + "%</div>") + "</div>" +
+      (pct === null ? "" : '<div class="meter" aria-hidden="true"><i style="width:' + pct + '%"></i></div>') +
+      (chips ? '<div class="chips">' + chips + "</div>" : "") +
+      '<details><summary>Ver voto por voto</summary><div class="scroll"><table class="cmp"><thead><tr><th>Votación</th><th>Tú</th><th>' + esc(r.S.n) + "</th></tr></thead><tbody>" + rows + "</tbody></table></div></details></article>";
+  }
+
+  function renderResults() {
+    var ids = answeredIds();
+    if (!ids.length) {
+      $("#res").innerHTML = '<p class="empty">Responde al menos una votación en el paso 2 para ver coincidencias.</p>';
+      $("#reveal").innerHTML = ""; $("#all").hidden = true;
+      return;
+    }
+    var res = compute(ids), q = norm(state.q.trim());
+    var shown = res.filter(function (r) { return !q || norm(r.S.n + " " + (r.S.p || "")).indexOf(q) >= 0; });
+    var cut = !q && !state.all ? shown.slice(0, SHOW) : shown;
+    $("#all").hidden = !!q;
+    $("#all").textContent = state.all ? "Mostrar solo los " + SHOW + " primeros" : "Mostrar los " + res.length + " senadores";
+    $("#res").innerHTML = cut.length ? cut.map(function (r) { return card(r, ids); }).join("") : '<p class="empty">Ningún senador coincide con "' + esc(state.q) + '".</p>';
+    renderReveal(ids);
+  }
+
+  function renderReveal(ids) {
+    $("#reveal").innerHTML = '<details><summary>Revelar quién presentó cada proyecto y cómo votó el Senado</summary><div class="scroll"><table class="cmp"><thead><tr><th>Votación</th><th>Presentado por</th><th>Fecha</th><th>Sí · No · Abst.</th><th>Resultado</th><th>Tú</th></tr></thead><tbody>' +
+      ids.map(function (id) {
+        var b = BILLS[id], m = state.ans[id];
+        return '<tr><td><a href="' + link(b) + '" target="_blank" rel="noopener">' + esc(b.short) + "</a><br><span class=\"hint\">Boletín " + esc(b.bol) + "</span></td><td>" + esc(author(b)) + '</td><td class="num">' + fecha(b.fecha) +
+          '</td><td class="num">' + b.si + " · " + b.no + " · " + b.ab + "</td><td>" + (passed(b) ? "Aprobado" : "Rechazado") + '</td><td class="v ' + vcls(m) + '">' + vname(m) + "</td></tr>";
+      }).join("") + "</tbody></table></div></details>" +
+      '<p class="note" style="margin-top:8px">Compara tu voto con quién presentó cada proyecto: si apoyas o rechazas en bloque lo que viene de un mismo sector, la votación ciega lo deja a la vista.</p>';
+  }
+
+  $("#q").addEventListener("input", function (e) { state.q = e.target.value; renderResults(); });
+  $("#all").addEventListener("click", function () { state.all = !state.all; renderResults(); });
+
+  /* ---------- Navegación ---------- */
+  function go(n) {
+    ["p1", "p2", "p3"].forEach(function (id, k) { $("#" + id).hidden = (k + 1 !== n); });
+    var btns = document.querySelectorAll(".step-btn");
+    for (var k = 0; k < btns.length; k++) {
+      if (Number(btns[k].getAttribute("data-go")) === n) btns[k].setAttribute("aria-current", "step");
+      else btns[k].removeAttribute("aria-current");
+    }
+    if (n === 2) renderVote();
+    if (n === 3) renderResults();
+    window.scrollTo(0, 0);
+  }
+  document.querySelector(".steps").addEventListener("click", function (e) {
+    var b = e.target.closest(".step-btn");
+    if (b) go(Number(b.getAttribute("data-go")));
+  });
+
+  buildStep1();
+  go(1);
+})();
+</script>
+
+</body>
+</html>
