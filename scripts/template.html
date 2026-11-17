@@ -85,6 +85,12 @@ select, input[type="text"], input[type="search"] {
 .status { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
 .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; background: var(--accent-soft); }
 .pill.ok { background: var(--good); color: var(--accent-ink); }
+.progress { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 220px; }
+.progress .meter { max-width: 320px; }
+.linkbtn { font: inherit; font-size: 0.86rem; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; text-decoration: underline; text-underline-offset: 2px; }
+.summary { font-size: 0.9rem; padding: 10px 14px; border-radius: 8px; background: var(--accent-soft); }
+.summary.thin { background: var(--info-bg); color: var(--info-ink); }
+.bill.pending-flash { outline: 2px solid var(--accent); outline-offset: 2px; }
 .btns { display: flex; gap: 8px; flex-wrap: wrap; }
 .btn {
   font: inherit; font-weight: 600; font-size: 0.9rem; padding: 9px 14px; border-radius: 8px; cursor: pointer;
@@ -196,7 +202,14 @@ footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; 
     </div>
     <div id="vote"></div>
     <div class="status">
-      <span id="prog"></span>
+      <div class="progress">
+        <span id="prog" aria-live="polite"></span>
+        <div class="meter" aria-hidden="true"><i id="progBar" style="width:0%"></i></div>
+        <div class="btns" style="gap:14px">
+          <button class="linkbtn" id="nextPending" type="button">Ir a la siguiente sin responder</button>
+          <button class="linkbtn" id="clearAns" type="button">Borrar mis respuestas</button>
+        </div>
+      </div>
       <div class="btns">
         <button class="btn" id="back1" type="button">Volver al reparto</button>
         <button class="btn primary" id="to3" type="button">Ver coincidencias</button>
@@ -216,6 +229,7 @@ footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; 
       </div>
       <button class="btn" id="all" type="button"></button>
     </div>
+    <p id="summary" class="summary" aria-live="polite"></p>
     <div id="res" class="list"></div>
     <div id="reveal"></div>
     <p class="note">La coincidencia muestra lo que votó, no lo que hará. Un voto puede responder a un acuerdo de coalición, por eso conviene mirar también las razones que dio en sala. El partido es la militancia que registra la <a href="https://datos.bcn.cl/" target="_blank" rel="noopener">Biblioteca del Congreso Nacional</a> a la fecha de cada voto; si la BCN no tiene registro para esa fecha, aparece "sin dato". Un pareo es un acuerdo entre dos senadores para no votar y no cuenta en el cálculo.</p>
@@ -353,9 +367,9 @@ var DATA = __DATA__;
     if (isNaN(i)) return;
     var others = sum(state.w) - state.w[i];
     state.w[i] = Math.min(Number(e.target.value), 100 - others);
-    updateStep1();
+    updateStep1(); save();
   });
-  $("#def").addEventListener("change", function (e) { state.def = e.target.value; updateStep1(); });
+  $("#def").addEventListener("change", function (e) { state.def = e.target.value; updateStep1(); save(); });
   $("#tax").addEventListener("input", function (e) {
     var n = parseInt(e.target.value.replace(/\D/g, ""), 10);
     state.tax = isNaN(n) ? 0 : n;
@@ -365,9 +379,9 @@ var DATA = __DATA__;
   $("#even").addEventListener("click", function () {
     var base = Math.floor(100 / AREAS.length), rest = 100 - base * AREAS.length;
     state.w = AREAS.map(function (_, i) { return base + (i < rest ? 1 : 0); });
-    updateStep1();
+    updateStep1(); save();
   });
-  $("#reset").addEventListener("click", function () { state.w = EXAMPLE_W.slice(0, AREAS.length); updateStep1(); });
+  $("#reset").addEventListener("click", function () { state.w = EXAMPLE_W.slice(0, AREAS.length); updateStep1(); save(); });
   $("#to2").addEventListener("click", function () { go(2); });
 
   /* ---------- Paso 2 ---------- */
@@ -391,7 +405,7 @@ var DATA = __DATA__;
         var btn = function (val, label) {
           return '<button type="button" class="opt" data-bill="' + id + '" data-val="' + val + '" aria-pressed="' + (cur === val) + '">' + label + "</button>";
         };
-        html += '<article class="bill" aria-label="Votación ' + n + '"><div><div class="eyebrow">Votación ' + n + "</div><h3>" + esc(b.short) + "</h3></div>" +
+        html += '<article class="bill" id="bill-' + id + '" aria-label="Votación ' + n + '"><div><div class="eyebrow">Votación ' + n + "</div><h3>" + esc(b.short) + "</h3></div>" +
           "<p>" + esc(b.titulo) + '.</p><p class="what">' + whatVoted(b) + "</p>" +
           '<div class="opts" role="group" aria-label="Tu voto">' + btn(1, "A favor") + btn(-1, "En contra") + btn(0, "Me abstengo") + "</div></article>";
       });
@@ -407,7 +421,11 @@ var DATA = __DATA__;
   }
   function updateProgress() {
     var total = sum(activeAreas().map(function (x) { return billsIn(x.a).length; })), done = answeredIds().length;
-    $("#prog").innerHTML = "Respondidas <b>" + done + "</b> de " + total;
+    var left = total - done;
+    $("#prog").innerHTML = "Respondidas <b>" + done + "</b> de " + total + (total ? (left ? " · faltan " + left : " · todas listas") : "");
+    $("#progBar").style.width = (total ? Math.round(done / total * 100) : 0) + "%";
+    $("#nextPending").hidden = !left || !total;
+    $("#clearAns").hidden = !Object.keys(state.ans).length;
     $("#to3").disabled = done === 0;
   }
   $("#vote").addEventListener("click", function (e) {
@@ -418,6 +436,27 @@ var DATA = __DATA__;
     var sibs = b.parentNode.querySelectorAll(".opt");
     for (var k = 0; k < sibs.length; k++) sibs[k].setAttribute("aria-pressed", sibs[k] === b ? "true" : "false");
     updateProgress();
+    save();
+  });
+  function firstPending() {
+    var ids = [];
+    activeAreas().forEach(function (x) { billsIn(x.a).forEach(function (id) { if (state.ans[id] === undefined) ids.push(id); }); });
+    return ids.length ? ids[0] : null;
+  }
+  $("#nextPending").addEventListener("click", function () {
+    var id = firstPending();
+    if (id === null) return;
+    var el = $("#bill-" + id);
+    el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    var first = el.querySelector(".opt");
+    if (first) first.focus({ preventScroll: true });
+  });
+  /* El botón pide confirmación en la misma página: el visor no muestra confirm(). */
+  var clearArmed = false;
+  $("#clearAns").addEventListener("click", function () {
+    if (!clearArmed) { clearArmed = true; this.textContent = "¿Seguro? Toca de nuevo para borrar"; return; }
+    clearArmed = false; this.textContent = "Borrar mis respuestas";
+    state.ans = {}; save(); renderVote();
   });
   $("#back1").addEventListener("click", function () { go(1); });
   $("#to3").addEventListener("click", function () { go(3); });
@@ -436,7 +475,7 @@ var DATA = __DATA__;
         if (got.length) {
           var a = sum(got.map(function (id) { return agree(state.ans[id], S.v[id]); })) / got.length;
           num += x.w * a; den += x.w;
-          per.push({ a: x.a, s: a });
+          per.push({ a: x.a, s: a, n: got.length });
         }
       });
       return { S: S, score: den ? num / den : null, per: per, voted: voted, total: ids.length };
@@ -460,7 +499,7 @@ var DATA = __DATA__;
   function card(r, ids) {
     var low = r.voted * 2 < r.total;
     var pct = r.score === null ? null : Math.round(r.score * 100);
-    var chips = r.per.map(function (p) { return '<span class="chip">' + esc(p.a) + " " + Math.round(p.s * 100) + "%</span>"; }).join("");
+    var chips = r.per.map(function (p) { return '<span class="chip">' + esc(p.a) + " " + Math.round(p.s * 100) + "% · " + p.n + (p.n === 1 ? " voto" : " votos") + "</span>"; }).join("");
     var rows = ids.map(function (id) {
       var mine = state.ans[id], his = r.S.v[id];
       return "<tr><td>" + esc(BILLS[id].short) + '</td><td class="v ' + vcls(mine) + '">' + vname(mine) + '</td><td class="v ' + vcls(his) + '">' + vname(his) + "</td></tr>";
@@ -478,10 +517,16 @@ var DATA = __DATA__;
     var ids = answeredIds();
     if (!ids.length) {
       $("#res").innerHTML = '<p class="empty">Responde al menos una votación en el paso 2 para ver coincidencias.</p>';
-      $("#reveal").innerHTML = ""; $("#all").hidden = true;
+      $("#reveal").innerHTML = ""; $("#all").hidden = true; $("#summary").hidden = true;
       return;
     }
     var res = compute(ids), q = norm(state.q.trim());
+    var nAreas = activeAreas().filter(function (x) { return billsIn(x.a).some(function (id) { return state.ans[id] !== undefined; }); }).length;
+    var sm = $("#summary"), thin = ids.length < 5;
+    sm.className = "summary" + (thin ? " thin" : "");
+    sm.textContent = "Comparación basada en tus " + ids.length + (ids.length === 1 ? " voto" : " votos") + " en " + nAreas + (nAreas === 1 ? " área" : " áreas") + "." +
+      (thin ? " Con menos de 5 votos, cada respuesta mueve mucho los porcentajes: responde más para una comparación firme." : "");
+    sm.hidden = false;
     var shown = res.filter(function (r) { return !q || norm(r.S.n + " " + (r.S.p || "")).indexOf(q) >= 0; });
     var cut = !q && !state.all ? shown.slice(0, SHOW) : shown;
     $("#all").hidden = !!q;
@@ -505,6 +550,7 @@ var DATA = __DATA__;
 
   /* ---------- Navegación ---------- */
   function go(n) {
+    state.step = n; save();
     ["p1", "p2", "p3"].forEach(function (id, k) { $("#" + id).hidden = (k + 1 !== n); });
     var btns = document.querySelectorAll(".step-btn");
     for (var k = 0; k < btns.length; k++) {
@@ -520,7 +566,33 @@ var DATA = __DATA__;
     if (b) go(Number(b.getAttribute("data-go")));
   });
 
+  /* ---------- Progreso guardado en este navegador ----------
+     Se guardan el reparto, los votos y el paso. No se guarda el monto de impuestos.
+     Los votos se guardan por boletín y fecha, para que sigan valiendo si cambia el orden de las votaciones. */
+  var KEY = "votop:v1";
+  var billKey = function (b) { return b.bol + "|" + b.fecha; };
+  function save() {
+    if (!booted) return;
+    var ans = {};
+    Object.keys(state.ans).forEach(function (id) { ans[billKey(BILLS[id])] = state.ans[id]; });
+    try { localStorage.setItem(KEY, JSON.stringify({ def: state.def, w: state.w, areas: AREAS, ans: ans, step: state.step })); } catch (e) {}
+  }
+  function load() {
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+    if (!s) return 1;
+    if (DEFS.some(function (d) { return d.id === s.def; })) state.def = s.def;
+    if (Array.isArray(s.w) && Array.isArray(s.areas)) {
+      var w = AREAS.map(function (a) { var k = s.areas.indexOf(a); return k >= 0 ? Number(s.w[k]) || 0 : 0; });
+      if (sum(w) <= 100) state.w = w;
+    }
+    BILLS.forEach(function (b, i) { var v = s.ans && s.ans[billKey(b)]; if (v === 1 || v === -1 || v === 0) state.ans[i] = v; });
+    return [1, 2, 3].indexOf(s.step) >= 0 ? s.step : 1;
+  }
+  var booted = false;
+  var startStep = load();
   buildStep1();
-  go(1);
+  booted = true;
+  go(startStep);
 })();
 </script>
