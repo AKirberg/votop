@@ -533,7 +533,7 @@ var DATA = __DATA__;
       (pct === null ? '<div class="score na">Sin votos</div>' : '<div class="score" aria-label="Coincidencia ' + pct + ' por ciento">' + pct + "%</div>") + "</div>" +
       (pct === null ? "" : '<div class="meter" aria-hidden="true"><i style="width:' + pct + '%"></i></div>') +
       (chips ? '<div class="chips">' + chips + "</div>" : "") +
-      '<details><summary>Ver voto por voto</summary><div class="scroll"><table class="cmp"><thead><tr><th>Votación</th><th>Tú</th><th>' + esc(r.S.n) + "</th></tr></thead><tbody>" + rows + "</tbody></table></div></details></article>";
+      '<details><summary>Ver voto por voto</summary><div class="scroll" tabindex="0" role="region" aria-label="Voto por voto con ' + esc(r.S.n) + '"><table class="cmp"><thead><tr><th>Votación</th><th>Tú</th><th>' + esc(r.S.n) + "</th></tr></thead><tbody>" + rows + "</tbody></table></div></details></article>";
   }
 
   function renderResults() {
@@ -592,7 +592,7 @@ var DATA = __DATA__;
   });
 
   function renderReveal(ids) {
-    $("#reveal").innerHTML = '<details><summary>Revelar quién presentó cada proyecto, cómo votó el Senado y qué pasó después</summary><div class="scroll"><table class="cmp"><thead><tr><th>Votación</th><th>Presentado por</th><th>Fecha</th><th>Sí · No · Abst.</th><th>Resultado</th><th>Qué pasó después</th><th>Tú</th></tr></thead><tbody>' +
+    $("#reveal").innerHTML = '<details><summary>Revelar quién presentó cada proyecto, cómo votó el Senado y qué pasó después</summary><div class="scroll" tabindex="0" role="region" aria-label="Detalle de cada proyecto"><table class="cmp"><thead><tr><th>Votación</th><th>Presentado por</th><th>Fecha</th><th>Sí · No · Abst.</th><th>Resultado</th><th>Qué pasó después</th><th>Tú</th></tr></thead><tbody>' +
       ids.map(function (id) {
         var b = BILLS[id], m = state.ans[id];
         return '<tr><td><a href="' + link(b) + '" target="_blank" rel="noopener">' + esc(b.short) + "</a><br><span class=\"hint\">Boletín " + esc(b.bol) + "</span></td><td>" + esc(author(b)) + '</td><td class="num">' + fecha(b.fecha) +

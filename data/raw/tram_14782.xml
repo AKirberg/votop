@@ -7,7 +7,7 @@
                     <camara_origen>Senado</camara_origen>
                     <urgencia_actual>Discusión inmediata</urgencia_actual>
                     <etapa>Segundo trámite constitucional (C.Diputados)</etapa>
-                    <subetapa>Primer informe de comisión de Trabajo y Seguridad Social</subetapa>
+                    <subetapa>Primer informe de comisión de Hacienda</subetapa>
                     <leynro></leynro>
                     <diariooficial></diariooficial>
                     <estado>En tramitación </estado>
@@ -86,6 +86,8 @@
 <tramite><SESION>87/374</SESION><FECHA>03/11/2026</FECHA><DESCRIPCIONTRAMITE>Cuenta del Mensaje 442-374 que retira y hace presente la urgencia Discusión inmediata</DESCRIPCIONTRAMITE><ETAPDESCRIPCION>Segundo trámite constitucional</ETAPDESCRIPCION><CAMARATRAMITE>C.Diputados</CAMARATRAMITE></tramite>
 <tramite><SESION>89/374</SESION><FECHA>09/11/2026</FECHA><DESCRIPCIONTRAMITE>Cuenta del Mensaje 446-374 que hace presente la urgencia Discusión inmediata</DESCRIPCIONTRAMITE><ETAPDESCRIPCION>Segundo trámite constitucional</ETAPDESCRIPCION><CAMARATRAMITE>C.Diputados</CAMARATRAMITE></tramite>
 <tramite><SESION>93/374</SESION><FECHA>12/11/2026</FECHA><DESCRIPCIONTRAMITE>Cuenta del Mensaje 461-374 que retira y hace presente la urgencia Discusión inmediata</DESCRIPCIONTRAMITE><ETAPDESCRIPCION>Segundo trámite constitucional</ETAPDESCRIPCION><CAMARATRAMITE>C.Diputados</CAMARATRAMITE></tramite>
+<tramite><SESION>/</SESION><FECHA>16/11/2026</FECHA><DESCRIPCIONTRAMITE>Primer informe de comisión de Trabajo y Seguridad Social. Pasa a Comisión de Hacienda</DESCRIPCIONTRAMITE><ETAPDESCRIPCION>Segundo trámite constitucional</ETAPDESCRIPCION><CAMARATRAMITE>C.Diputados</CAMARATRAMITE></tramite>
+<tramite><SESION>94/374</SESION><FECHA>16/11/2026</FECHA><DESCRIPCIONTRAMITE>Cuenta de primer informe de comisión .  </DESCRIPCIONTRAMITE><ETAPDESCRIPCION>Segundo trámite constitucional</ETAPDESCRIPCION><CAMARATRAMITE>C.Diputados</CAMARATRAMITE></tramite>
 </tramitacion>
 <votaciones></votaciones>
 <urgencias><urgencia><TIPO>Suma</TIPO><FECHAINGRESO>04/01/2022</FECHAINGRESO><MENSAJEINGRESO>419-369</MENSAJEINGRESO><FECHARETIRO>18/01/2022</FECHARETIRO><MENSAJERETIRO>364-369</MENSAJERETIRO><CAMARARETIRO>Senado</CAMARARETIRO></urgencia>
@@ -132,6 +134,9 @@
 <informe><FECHAINFORME>24/11/2025</FECHAINFORME><TRAMITE>Segundo informe de comisión de Trabajo y Previsión Social </TRAMITE><ETAPA>Primer trámite constitucional</ETAPA><LINK_INFORME>http://www.senado.cl/appsenado/index.php?mo=tramitacion&amp;ac=getDocto&amp;iddocto=27679&amp;tipodoc=info</LINK_INFORME></informe>
 <informe><FECHAINFORME>22/07/2026</FECHAINFORME><TRAMITE>Segundo informe de comisión de Educación </TRAMITE><ETAPA>Primer trámite constitucional</ETAPA><LINK_INFORME>http://www.senado.cl/appsenado/index.php?mo=tramitacion&amp;ac=getDocto&amp;iddocto=28110&amp;tipodoc=info</LINK_INFORME></informe>
 <informe><FECHAINFORME>17/08/2026</FECHAINFORME><TRAMITE>Segundo informe de comisión de Hacienda </TRAMITE><ETAPA>Primer trámite constitucional</ETAPA><LINK_INFORME>http://www.senado.cl/appsenado/index.php?mo=tramitacion&amp;ac=getDocto&amp;iddocto=28169&amp;tipodoc=info</LINK_INFORME></informe>
+<informe><FECHAINFORME>16/11/2026</FECHAINFORME><TRAMITE>Primer informe de comisión de Trabajo y Seguridad Social </TRAMITE><ETAPA>Segundo trámite constitucional</ETAPA></informe>
+<informe><FECHAINFORME>16/11/2026</FECHAINFORME><TRAMITE>Primer informe de comisión de Trabajo y Seguridad Social </TRAMITE><ETAPA>Segundo trámite constitucional</ETAPA></informe>
+<informe><FECHAINFORME>16/11/2026</FECHAINFORME><TRAMITE>Primer informe de comisión de Trabajo y Seguridad Social </TRAMITE><ETAPA>Segundo trámite constitucional</ETAPA><LINK_INFORME>http://www.senado.cl/appsenado/index.php?mo=tramitacion&amp;ac=getDocto&amp;iddocto=28403&amp;tipodoc=info</LINK_INFORME></informe>
 </informes>
 <comparados><comparado><COMPARADO>Comparado Primer trámite constitucional(Primer informe de comisión) Comision de Educación. </COMPARADO><LINK_COMPARADO>http://www.senado.cl/appsenado/index.php?mo=tramitacion&amp;ac=getDocto&amp;iddocto=4957&amp;tipodoc=compa</LINK_COMPARADO></comparado>
 <comparado><COMPARADO>Comparado Primer trámite constitucional(Segundo informe de comisión) Comision de Trabajo y Previsión Social. COMPARADO DE TRABAJO</COMPARADO><LINK_COMPARADO>http://www.senado.cl/appsenado/index.php?mo=tramitacion&amp;ac=getDocto&amp;iddocto=4980&amp;tipodoc=compa</LINK_COMPARADO></comparado>

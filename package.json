@@ -1,0 +1,12 @@
+{
+  "name": "votop",
+  "private": true,
+  "description": "Voto con Contenido: compara tus votos con los del Senado de Chile",
+  "scripts": {
+    "actualizar": "python3 scripts/actualizar.py",
+    "test": "python3 tests/check_data.py && node tests/pagina.js"
+  },
+  "devDependencies": {
+    "axe-core": "4.10.2"
+  }
+}

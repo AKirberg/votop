@@ -10,12 +10,26 @@ El partido de cada senador es la militancia que registra la Biblioteca del Congr
 
 No se usan los datos abiertos de la Cámara: hoy asignan mal los nombres de quienes votan (los totales cuadran, los nombres no).
 
-## Regenerar
+## Agregar o quitar votaciones
+
+La lista está en `data/seleccion.json`: cada votación se identifica por boletín y fecha, con su área y un título breve. El orden de las áreas en ese archivo es el orden en la página.
+
+## Actualizar
 
 ```bash
-python3 scripts/build_senado.py data/raw data/senado.json
-python3 scripts/build_page.py
-node scripts/make_og.js   # solo si cambia la imagen para redes (og.png)
+python3 scripts/actualizar.py
 ```
 
-`build_senado.py` lee los XML del Senado (`votaciones.php`, `tramitacion.php`) y las militancias de la BCN guardadas en `data/raw/`, y escribe `data/senado.json`. `build_page.py` inyecta esos datos en `scripts/template.html` y genera `index.html` (sitio) y `dist/artifact.html` (versión para claude.ai).
+Descarga del Senado y de la BCN, verifica que los conteos cuadren, regenera `index.html` y `dist/artifact.html` y muestra qué cambió respecto de la versión anterior. Si algo falla, no cambia nada en el repo. Con `--sin-descargar` solo regenera desde `data/raw/`.
+
+Por dentro llama a `scripts/build_senado.py` (arma `data/senado.json`) y `scripts/build_page.py` (inyecta los datos en `scripts/template.html`). La imagen para redes se regenera aparte con `node scripts/make_og.js`.
+
+## Pruebas
+
+```bash
+npm install
+npm test
+```
+
+- `tests/check_data.py` (sin dependencias): la selección y los datos coinciden, los votos por senador suman el total oficial y las páginas llevan exactamente esos datos.
+- `tests/pagina.js`: en un navegador real, en modo claro y oscuro, prueba votar, retomar tras recargar, ver resultados, buscar, compartir (sin votos ni montos) y borrar, y audita accesibilidad con axe-core. Requiere Playwright con Chromium; si el Chromium está en otra ruta, indícala con `CHROMIUM_PATH`.

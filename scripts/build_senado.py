@@ -1,31 +1,12 @@
-"""Arma senado.json: votaciones nominales reales del Senado (período 2022-2026) para el piloto.
-Fuente: tramitacion.senado.cl/wspublico (votaciones.php, tramitacion.php, senadores_vigentes.php)."""
-import re, json, sys, datetime, html
+"""Arma senado.json: votaciones nominales reales del Senado para el piloto.
+Fuentes: tramitacion.senado.cl/wspublico (votaciones.php, tramitacion.php) y militancias de datos.bcn.cl.
+Uso: python3 scripts/build_senado.py data/raw data/senado.json
+La lista de votaciones está en data/seleccion.json."""
+import re, json, sys, os, datetime, html
 RAW, OUT = sys.argv[1], sys.argv[2]
-# (área, boletín, fecha de la votación, título breve). La votación se identifica por boletín + fecha + tipo general/única.
-PICK = [
- ("Pensiones y trabajo", "15480", "2025-01-27", "Reforma de pensiones: nuevo sistema mixto y seguro social"),
- ("Pensiones y trabajo", "15864", "2023-05-17", "Alza del ingreso mínimo y ampliación de la asignación familiar"),
- ("Pensiones y trabajo", "17080", "2025-03-05", "Convenio 155 de la OIT sobre seguridad y salud de los trabajadores"),
- ("Salud", "12662", "2022-06-01", "Seguro de salud catastrófico en Fonasa (libre elección)"),
- ("Salud", "14211", "2022-10-05", "Prohibir informar las deudas contraídas por atenciones de salud"),
- ("Seguridad", "14870", "2023-04-04", "Más protección legal para policías y Gendarmería"),
- ("Seguridad", "14015", "2022-08-09", "Cárcel por usurpación de inmuebles y detención más fácil de ocupantes"),
- ("Seguridad", "16132", "2025-09-09", "Prevención del delito y apoyo a víctimas a cargo de los gobiernos regionales"),
- ("Educación", "16743", "2025-06-04", "Facilitar la creación de nuevos colegios"),
- ("Educación", "15715", "2023-09-05", "Un solo sistema de evaluación y desarrollo profesional docente"),
- ("Medio ambiente", "16553", "2025-09-30", "Fortalecer la fiscalización de la Superintendencia del Medio Ambiente"),
- ("Transporte y telecomunicaciones", "14532", "2025-05-06", "Más competencia en el cabotaje marítimo"),
- ("Pensiones y trabajo", "14782", "2024-04-02", "Sala cuna para trabajadoras, trabajadores e independientes, con un fondo solidario"),
- ("Pensiones y trabajo", "15244", "2024-05-07", "Proteger el empleo ante despidos masivos"),
- ("Salud", "16002", "2023-07-18", "Exigir carnet para comprar bebidas alcohólicas"),
- ("Seguridad", "14614", "2024-12-03", "Crear el Ministerio de Seguridad Pública"),
- ("Seguridad", "11915", "2023-03-14", "Narcotráfico y crimen organizado: persecución, bienes incautados y rehabilitación"),
- ("Economía", "14743", "2023-09-26", "Crear un registro de deuda consolidada"),
- ("Transporte y telecomunicaciones", "16097", "2024-06-05", "Facilitar la instalación de antenas de telecomunicaciones en zonas rurales"),
-]
-# orden de las áreas en la página
-PICK.sort(key=lambda x: ["Pensiones y trabajo", "Salud", "Seguridad", "Educación", "Economía", "Medio ambiente", "Transporte y telecomunicaciones"].index(x[0]))
+SEL = json.load(open(os.path.join(os.path.dirname(os.path.abspath(RAW)), "seleccion.json"), encoding="utf-8"))
+# (área, boletín, fecha de la votación, título breve), en el orden del archivo
+PICK = [(a["area"], v["boletin"], v["fecha"], v["titulo_breve"]) for a in SEL["areas"] for v in a["votaciones"]]
 def G(t, s):
     m = re.search(rf"<{t}>(.*?)</{t}>", s, re.S); return html.unescape(m.group(1)).strip() if m else ""
 def iso(d): return datetime.datetime.strptime(d, "%d/%m/%Y").date().isoformat()
