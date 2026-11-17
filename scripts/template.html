@@ -6,7 +6,7 @@
 :root {
   --bg: #F4F6FA; --surface: #FFFFFF; --ink: #151B2E; --muted: #5A6379; --line: #DDE2EC;
   --accent: #2F4BDB; --accent-soft: #E6EBFF; --accent-ink: #FFFFFF;
-  --good: #1E7B4F; --bad: #B3342E; --flat: #6B7385; --info-bg: #E3F1EA; --info-ink: #17402C;
+  --good: #1E7B4F; --bad: #B3342E; --flat: #5B6376; --info-bg: #E3F1EA; --info-ink: #17402C;
   --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -110,7 +110,7 @@ select, input[type="text"], input[type="search"] {
 .bill .what { font-size: 0.84rem; color: var(--muted); }
 .opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .opt {
-  font: inherit; font-weight: 600; font-size: 0.88rem; padding: 9px 6px; border-radius: 8px; cursor: pointer;
+  font: inherit; font-weight: 600; font-size: 0.88rem; padding: 9px 6px; min-height: 44px; border-radius: 8px; cursor: pointer;
   background: var(--surface); color: var(--ink); border: 1.5px solid var(--line);
 }
 .opt[aria-pressed="true"] { border-width: 2px; }
@@ -134,7 +134,11 @@ select, input[type="text"], input[type="search"] {
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { font-size: 0.78rem; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); font-variant-numeric: tabular-nums; }
 .coh { font-size: 0.85rem; color: var(--muted); }
-details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: var(--accent); }
+details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: var(--accent); padding-block: 8px; }
+.linkbtn { min-height: 32px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+h2:focus { outline: none; }
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cmp { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-top: 8px; }
 .cmp th, .cmp td { text-align: left; padding: 6px 8px; border-top: 1px solid var(--line); vertical-align: top; }
 .cmp th { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-top: 0; }
@@ -150,10 +154,11 @@ details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: 
 .about p, .about li { max-width: 66ch; font-size: 0.92rem; }
 .about ul { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
 .about .body { display: flex; flex-direction: column; gap: 8px; }
+footer a { display: inline-block; padding-block: 6px; }
 footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; flex-wrap: wrap; }
 </style>
 
-<div class="wrap">
+<main class="wrap">
   <header>
     <div class="eyebrow">Piloto con datos reales · Senado de Chile, período 2022–2026</div>
     <h1>Voto con Contenido</h1>
@@ -170,7 +175,7 @@ footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; 
 
   <section class="panel" id="p1" aria-labelledby="h1a">
     <div>
-      <h2 id="h1a">Reparte el margen que sí puedes decidir</h2>
+      <h2 id="h1a" tabindex="-1">Reparte el margen que sí puedes decidir</h2>
       <p class="lead">Una parte del gasto público ya está fijada por ley. Tú decides cómo repartir el resto entre las __NA__ áreas del piloto. Poner más en un área obliga a sacar de otra.</p>
     </div>
     <div class="row">
@@ -200,7 +205,7 @@ footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; 
 
   <section class="panel" id="p2" aria-labelledby="h2a" hidden>
     <div>
-      <h2 id="h2a">Vota lo mismo que votó el Senado</h2>
+      <h2 id="h2a" tabindex="-1">Vota lo mismo que votó el Senado</h2>
       <p class="lead">Solo aparecen las áreas a las que asignaste margen, las más importantes para ti primero. No se muestra quién presentó el proyecto, la fecha ni el resultado.</p>
     </div>
     <div id="vote"></div>
@@ -222,7 +227,7 @@ footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; 
 
   <section class="panel" id="p3" aria-labelledby="h3a" hidden>
     <div>
-      <h2 id="h3a">Con quién coincides</h2>
+      <h2 id="h3a" tabindex="-1">Con quién coincides</h2>
       <p class="lead">El porcentaje pesa cada área según el margen que le diste y se calcula solo con las votaciones en que el senador votó. Votar igual suma 1, una abstención frente a un voto suma 0,5 y votar distinto suma 0.</p>
     </div>
     <div class="toolbar">
@@ -233,6 +238,7 @@ footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; 
       <button class="btn" id="all" type="button"></button>
     </div>
     <p id="summary" class="summary" aria-live="polite"></p>
+    <p id="count" class="sr-only" aria-live="polite"></p>
     <div id="res" class="list"></div>
     <section class="share" id="share" aria-labelledby="shareH" hidden>
       <div>
@@ -281,7 +287,7 @@ footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; 
     <span>Datos actualizados el __BUILT__.</span>
     <a href="https://github.com/AKirberg/votop" target="_blank" rel="noopener">Código y datos en GitHub</a>
   </footer>
-</div>
+</main>
 
 <script>
 var DATA = __DATA__;
@@ -363,6 +369,7 @@ var DATA = __DATA__;
   function updateStep1() {
     var d = defOf(), fixed = d.pct, free = 100 - fixed;
     $("#defHint").textContent = d.hint;
+    $("#split").setAttribute("aria-label", "Gasto comprometido " + pf(fixed) + "%, tu margen " + pf(free) + "%");
     $("#split").innerHTML =
       '<div class="fixed" style="width:' + fixed + '%">Comprometido ' + pf(fixed) + "%</div>" +
       '<div class="free" style="width:' + free + '%">Tu margen ' + pf(free) + "%</div>";
@@ -375,6 +382,7 @@ var DATA = __DATA__;
       var ofTotal = state.w[i] * free / 100;
       $("#v" + i).innerHTML = "<b>" + state.w[i] + " pts</b><small>" + pf(ofTotal) + "% · " + clp(state.tax * ofTotal / 100) + "</small>";
       $("#r" + i).value = state.w[i];
+      $("#r" + i).setAttribute("aria-valuetext", state.w[i] + " puntos, " + pf(ofTotal) + "% del gasto, " + clp(state.tax * ofTotal / 100));
     });
   }
   $("#areas").addEventListener("input", function (e) {
@@ -422,7 +430,7 @@ var DATA = __DATA__;
         };
         html += '<article class="bill" id="bill-' + id + '" aria-label="Votación ' + n + '"><div><div class="eyebrow">Votación ' + n + "</div><h3>" + esc(b.short) + "</h3></div>" +
           "<p>" + esc(b.titulo) + '.</p><p class="what">' + whatVoted(b) + "</p>" +
-          '<div class="opts" role="group" aria-label="Tu voto">' + btn(1, "A favor") + btn(-1, "En contra") + btn(0, "Me abstengo") + "</div></article>";
+          '<div class="opts" role="group" aria-label="Tu voto sobre: ' + esc(b.short) + '">' + btn(1, "A favor") + btn(-1, "En contra") + btn(0, "Me abstengo") + "</div></article>";
       });
       html += "</section>";
     });
@@ -546,6 +554,7 @@ var DATA = __DATA__;
     var cut = !q && !state.all ? shown.slice(0, SHOW) : shown;
     $("#all").hidden = !!q;
     $("#all").textContent = state.all ? "Mostrar solo los " + SHOW + " primeros" : "Mostrar los " + res.length + " senadores";
+    $("#count").textContent = q ? (shown.length === 1 ? "1 senador encontrado" : shown.length + " senadores encontrados") : "";
     $("#res").innerHTML = cut.length ? cut.map(function (r) { return card(r, ids); }).join("") : '<p class="empty">Ningún senador coincide con "' + esc(state.q) + '".</p>';
     renderReveal(ids);
     renderShare(res, ids);
@@ -607,6 +616,8 @@ var DATA = __DATA__;
     if (n === 2) renderVote();
     if (n === 3) renderResults();
     window.scrollTo(0, 0);
+    if (booted && moved) { var h = $("#p" + n + " h2"); if (h) h.focus({ preventScroll: true }); }
+    moved = true;
   }
   document.querySelector(".steps").addEventListener("click", function (e) {
     var b = e.target.closest(".step-btn");
@@ -636,7 +647,7 @@ var DATA = __DATA__;
     BILLS.forEach(function (b, i) { var v = s.ans && s.ans[billKey(b)]; if (v === 1 || v === -1 || v === 0) state.ans[i] = v; });
     return [1, 2, 3].indexOf(s.step) >= 0 ? s.step : 1;
   }
-  var booted = false;
+  var booted = false, moved = false;
   var startStep = load();
   buildStep1();
   booted = true;

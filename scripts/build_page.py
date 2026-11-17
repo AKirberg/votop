@@ -30,6 +30,6 @@ head = """<!doctype html>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232F4BDB'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' stroke='white' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 """
-i = body.index('<div class="wrap">')
+i = body.index('<main class="wrap">')
 open(f"{ROOT}/index.html", "w", encoding="utf-8").write(head + body[:i] + "</head>\n<body>\n" + body[i:] + "\n</body>\n</html>\n")
 print("index.html y dist/artifact.html generados")
