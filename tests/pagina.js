@@ -76,6 +76,22 @@ const ok = (cond, msg) => { if (!cond) fallas.push(msg); };
       await p.$$eval(".leg details", (ds) => ds.forEach((d) => (d.open = true)));
       await axe("paso 3"); await sinDesborde("paso 3");
 
+      // Cambiar de período: cada período tiene sus propios votos y senadores
+      const periodos = await p.$$eval('#period input', (xs) => xs.map((x) => x.value));
+      ok(periodos.length >= 2 && (await p.isChecked(`#period input[value="${periodos[0]}"]`)), `[${scheme}] no abre en el primer período`);
+      await p.click(`#period label:has(input[value="${periodos[1]}"])`);
+      ok((await p.textContent("#summary")) === "" || (await p.isHidden("#summary")), `[${scheme}] el otro período muestra votos que no se respondieron`);
+      await p.click('.step-btn[data-go="2"]');
+      const total2 = await p.$$eval(".bill", (b) => b.length);
+      ok((await p.textContent("#prog")).includes(`Respondidas 0 de ${total2}`), `[${scheme}] el segundo período no parte en cero`);
+      ok((await p.textContent("#bannerN")) === String(total2), `[${scheme}] el aviso superior no cambia al cambiar de período`);
+      await (await p.$('.opt[data-val="1"]')).click();
+      await p.reload();
+      ok(await p.isChecked(`#period input[value="${periodos[1]}"]`), `[${scheme}] al recargar no recuerda el período`);
+      ok((await p.textContent("#prog")).includes("Respondidas 1"), `[${scheme}] al recargar se pierde el voto del segundo período`);
+      await p.click(`#period label:has(input[value="${periodos[0]}"])`);
+      ok((await p.textContent("#prog")).includes(`Respondidas ${total} de ${total}`), `[${scheme}] al volver al primer período se perdieron sus votos`);
+
       // Borrar respuestas (dos toques)
       await p.click('.step-btn[data-go="2"]');
       await p.click("#clearAns"); await p.click("#clearAns");

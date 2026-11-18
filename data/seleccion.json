@@ -1,138 +1,273 @@
 {
-  "periodo": {
-    "desde": "2022-03-11",
-    "hasta": "2026-03-10",
-    "nombre": "2022-2026"
-  },
-  "nota": "Cada votación se identifica por boletín (sin sufijo) y fecha. Se usa la votación nominal de ese día que sea en general, única o informe de Comisión Mixta. El orden de las áreas en la página sigue el orden de este archivo.",
-  "areas": [
+  "nota": "Cada votación se identifica por boletín (sin sufijo) y fecha. Se usa la votación nominal de ese día que sea en general, única o informe de Comisión Mixta; si hay más de una, 'tema_contiene' indica cuál. El primer período es el que la página muestra al abrir. El orden de las áreas sigue el orden de este archivo.",
+  "periodos": [
     {
-      "area": "Pensiones y trabajo",
-      "votaciones": [
+      "id": "2026-2030",
+      "nombre": "Senado actual (2026–2030)",
+      "desde": "2026-03-11",
+      "hasta": "2030-03-10",
+      "actual": true,
+      "areas": [
         {
-          "boletin": "15480",
-          "fecha": "2025-01-27",
-          "titulo_breve": "Reforma de pensiones: nuevo sistema mixto y seguro social"
+          "area": "Pensiones y trabajo",
+          "votaciones": [
+            {
+              "boletin": "15694",
+              "fecha": "2026-06-09",
+              "titulo_breve": "Medidas para la inclusión laboral de las mujeres en las empresas"
+            },
+            {
+              "boletin": "18230",
+              "fecha": "2026-06-10",
+              "titulo_breve": "Reajuste del ingreso mínimo, la asignación familiar y el subsidio familiar"
+            },
+            {
+              "boletin": "18431",
+              "fecha": "2026-08-05",
+              "titulo_breve": "Cambios al Sistema Nacional de Apoyos y Cuidados"
+            }
+          ]
         },
         {
-          "boletin": "15864",
-          "fecha": "2023-05-17",
-          "titulo_breve": "Alza del ingreso mínimo y ampliación de la asignación familiar"
+          "area": "Salud",
+          "votaciones": [
+            {
+              "boletin": "16742",
+              "fecha": "2026-07-14",
+              "titulo_breve": "Información accesible sobre medicamentos y otros productos farmacéuticos"
+            }
+          ]
         },
         {
-          "boletin": "17080",
-          "fecha": "2025-03-05",
-          "titulo_breve": "Convenio 155 de la OIT sobre seguridad y salud de los trabajadores"
+          "area": "Seguridad",
+          "votaciones": [
+            {
+              "boletin": "15261",
+              "fecha": "2026-05-05",
+              "titulo_breve": "Delito de ingreso clandestino al país"
+            },
+            {
+              "boletin": "15805",
+              "fecha": "2026-10-07",
+              "titulo_breve": "Reglas generales sobre el uso de la fuerza para policías y Fuerzas Armadas"
+            },
+            {
+              "boletin": "18029",
+              "fecha": "2026-07-08",
+              "titulo_breve": "Reconocimiento y reparación de víctimas de violencia en el conflicto del Biobío a Los Lagos",
+              "tema_contiene": "En votación en general el proyecto de ley"
+            },
+            {
+              "boletin": "15589",
+              "fecha": "2026-07-07",
+              "titulo_breve": "Fortalecer la responsabilidad penal adolescente"
+            }
+          ]
         },
         {
-          "boletin": "14782",
-          "fecha": "2024-04-02",
-          "titulo_breve": "Sala cuna para trabajadoras, trabajadores e independientes, con un fondo solidario"
+          "area": "Educación",
+          "votaciones": [
+            {
+              "boletin": "18156",
+              "fecha": "2026-05-18",
+              "titulo_breve": "Seguridad, orden y respeto en la comunidad educativa"
+            },
+            {
+              "boletin": "18551",
+              "fecha": "2026-10-28",
+              "titulo_breve": "Ajustes al traspaso de colegios a los Servicios Locales de Educación",
+              "tema_contiene": "En votación, en general, el proyecto de ley que modifica la ley N° 21.040"
+            }
+          ]
         },
         {
-          "boletin": "15244",
-          "fecha": "2024-05-07",
-          "titulo_breve": "Proteger el empleo ante despidos masivos"
+          "area": "Economía",
+          "votaciones": [
+            {
+              "boletin": "18216",
+              "fecha": "2026-06-24",
+              "titulo_breve": "Proyecto de reconstrucción nacional y desarrollo económico y social"
+            },
+            {
+              "boletin": "18296",
+              "fecha": "2026-07-07",
+              "titulo_breve": "Autorizar mayor endeudamiento del gobierno central en 2026"
+            },
+            {
+              "boletin": "18259",
+              "fecha": "2026-09-09",
+              "titulo_breve": "Cambios al amparo minero en el Código de Minería"
+            }
+          ]
+        },
+        {
+          "area": "Medio ambiente",
+          "votaciones": [
+            {
+              "boletin": "16335",
+              "fecha": "2026-11-11",
+              "titulo_breve": "Prevención y mitigación de incendios forestales"
+            }
+          ]
+        },
+        {
+          "area": "Vivienda",
+          "votaciones": [
+            {
+              "boletin": "17012",
+              "fecha": "2026-09-08",
+              "titulo_breve": "Sistemas de seguridad contra caídas en edificios en altura"
+            }
+          ]
+        },
+        {
+          "area": "Transporte y telecomunicaciones",
+          "votaciones": [
+            {
+              "boletin": "18860",
+              "fecha": "2026-11-16",
+              "titulo_breve": "Condiciones de contratación y pago a pymes de transporte de carga"
+            }
+          ]
         }
       ]
     },
     {
-      "area": "Salud",
-      "votaciones": [
+      "id": "2022-2026",
+      "nombre": "Senado 2022–2026",
+      "desde": "2022-03-11",
+      "hasta": "2026-03-10",
+      "areas": [
         {
-          "boletin": "12662",
-          "fecha": "2022-06-01",
-          "titulo_breve": "Seguro de salud catastrófico en Fonasa (libre elección)"
+          "area": "Pensiones y trabajo",
+          "votaciones": [
+            {
+              "boletin": "15480",
+              "fecha": "2025-01-27",
+              "titulo_breve": "Reforma de pensiones: nuevo sistema mixto y seguro social"
+            },
+            {
+              "boletin": "15864",
+              "fecha": "2023-05-17",
+              "titulo_breve": "Alza del ingreso mínimo y ampliación de la asignación familiar",
+              "tema_contiene": "Votación en general del proyecto de ley"
+            },
+            {
+              "boletin": "17080",
+              "fecha": "2025-03-05",
+              "titulo_breve": "Convenio 155 de la OIT sobre seguridad y salud de los trabajadores"
+            },
+            {
+              "boletin": "14782",
+              "fecha": "2024-04-02",
+              "titulo_breve": "Sala cuna para trabajadoras, trabajadores e independientes, con un fondo solidario"
+            },
+            {
+              "boletin": "15244",
+              "fecha": "2024-05-07",
+              "titulo_breve": "Proteger el empleo ante despidos masivos"
+            }
+          ]
         },
         {
-          "boletin": "14211",
-          "fecha": "2022-10-05",
-          "titulo_breve": "Prohibir informar las deudas contraídas por atenciones de salud"
+          "area": "Salud",
+          "votaciones": [
+            {
+              "boletin": "12662",
+              "fecha": "2022-06-01",
+              "titulo_breve": "Seguro de salud catastrófico en Fonasa (libre elección)"
+            },
+            {
+              "boletin": "14211",
+              "fecha": "2022-10-05",
+              "titulo_breve": "Prohibir informar las deudas contraídas por atenciones de salud"
+            },
+            {
+              "boletin": "16002",
+              "fecha": "2023-07-18",
+              "titulo_breve": "Exigir carnet para comprar bebidas alcohólicas"
+            }
+          ]
         },
         {
-          "boletin": "16002",
-          "fecha": "2023-07-18",
-          "titulo_breve": "Exigir carnet para comprar bebidas alcohólicas"
-        }
-      ]
-    },
-    {
-      "area": "Seguridad",
-      "votaciones": [
-        {
-          "boletin": "14870",
-          "fecha": "2023-04-04",
-          "titulo_breve": "Más protección legal para policías y Gendarmería"
+          "area": "Seguridad",
+          "votaciones": [
+            {
+              "boletin": "14870",
+              "fecha": "2023-04-04",
+              "titulo_breve": "Más protección legal para policías y Gendarmería"
+            },
+            {
+              "boletin": "14015",
+              "fecha": "2022-08-09",
+              "titulo_breve": "Cárcel por usurpación de inmuebles y detención más fácil de ocupantes"
+            },
+            {
+              "boletin": "16132",
+              "fecha": "2025-09-09",
+              "titulo_breve": "Prevención del delito y apoyo a víctimas a cargo de los gobiernos regionales"
+            },
+            {
+              "boletin": "14614",
+              "fecha": "2024-12-03",
+              "titulo_breve": "Crear el Ministerio de Seguridad Pública"
+            },
+            {
+              "boletin": "11915",
+              "fecha": "2023-03-14",
+              "titulo_breve": "Narcotráfico y crimen organizado: persecución, bienes incautados y rehabilitación"
+            }
+          ]
         },
         {
-          "boletin": "14015",
-          "fecha": "2022-08-09",
-          "titulo_breve": "Cárcel por usurpación de inmuebles y detención más fácil de ocupantes"
+          "area": "Educación",
+          "votaciones": [
+            {
+              "boletin": "16743",
+              "fecha": "2025-06-04",
+              "titulo_breve": "Facilitar la creación de nuevos colegios"
+            },
+            {
+              "boletin": "15715",
+              "fecha": "2023-09-05",
+              "titulo_breve": "Un solo sistema de evaluación y desarrollo profesional docente"
+            }
+          ]
         },
         {
-          "boletin": "16132",
-          "fecha": "2025-09-09",
-          "titulo_breve": "Prevención del delito y apoyo a víctimas a cargo de los gobiernos regionales"
+          "area": "Economía",
+          "votaciones": [
+            {
+              "boletin": "14743",
+              "fecha": "2023-09-26",
+              "titulo_breve": "Crear un registro de deuda consolidada"
+            }
+          ]
         },
         {
-          "boletin": "14614",
-          "fecha": "2024-12-03",
-          "titulo_breve": "Crear el Ministerio de Seguridad Pública"
+          "area": "Medio ambiente",
+          "votaciones": [
+            {
+              "boletin": "16553",
+              "fecha": "2025-09-30",
+              "titulo_breve": "Fortalecer la fiscalización de la Superintendencia del Medio Ambiente"
+            }
+          ]
         },
         {
-          "boletin": "11915",
-          "fecha": "2023-03-14",
-          "titulo_breve": "Narcotráfico y crimen organizado: persecución, bienes incautados y rehabilitación"
-        }
-      ]
-    },
-    {
-      "area": "Educación",
-      "votaciones": [
-        {
-          "boletin": "16743",
-          "fecha": "2025-06-04",
-          "titulo_breve": "Facilitar la creación de nuevos colegios"
-        },
-        {
-          "boletin": "15715",
-          "fecha": "2023-09-05",
-          "titulo_breve": "Un solo sistema de evaluación y desarrollo profesional docente"
-        }
-      ]
-    },
-    {
-      "area": "Economía",
-      "votaciones": [
-        {
-          "boletin": "14743",
-          "fecha": "2023-09-26",
-          "titulo_breve": "Crear un registro de deuda consolidada"
-        }
-      ]
-    },
-    {
-      "area": "Medio ambiente",
-      "votaciones": [
-        {
-          "boletin": "16553",
-          "fecha": "2025-09-30",
-          "titulo_breve": "Fortalecer la fiscalización de la Superintendencia del Medio Ambiente"
-        }
-      ]
-    },
-    {
-      "area": "Transporte y telecomunicaciones",
-      "votaciones": [
-        {
-          "boletin": "14532",
-          "fecha": "2025-05-06",
-          "titulo_breve": "Más competencia en el cabotaje marítimo"
-        },
-        {
-          "boletin": "16097",
-          "fecha": "2024-06-05",
-          "titulo_breve": "Facilitar la instalación de antenas de telecomunicaciones en zonas rurales"
+          "area": "Transporte y telecomunicaciones",
+          "votaciones": [
+            {
+              "boletin": "14532",
+              "fecha": "2025-05-06",
+              "titulo_breve": "Más competencia en el cabotaje marítimo"
+            },
+            {
+              "boletin": "16097",
+              "fecha": "2024-06-05",
+              "titulo_breve": "Facilitar la instalación de antenas de telecomunicaciones en zonas rurales"
+            }
+          ]
         }
       ]
     }

@@ -43,6 +43,13 @@ a { color: var(--accent); }
 .banner a { color: inherit; }
 .eyebrow { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
 
+.period { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.period legend { float: left; font-size: 0.82rem; font-weight: 600; margin-right: 4px; padding: 0; }
+.period label { display: inline-flex; align-items: center; min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600; font-size: 0.88rem; }
+.period input { position: absolute; opacity: 0; pointer-events: none; }
+.period input:checked + span { color: var(--accent-ink); }
+.period label:has(input:checked) { background: var(--accent); border-color: var(--accent); }
+.period label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .step-btn {
   font: inherit; text-align: left; background: var(--surface); color: var(--muted); border: 1px solid var(--line);
@@ -160,12 +167,16 @@ footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; 
 
 <main class="wrap">
   <header>
-    <div class="eyebrow">Piloto con datos reales · Senado de Chile, período 2022–2026</div>
+    <div class="eyebrow">Datos reales · Senado de Chile</div>
     <h1>Voto con Contenido</h1>
     <p class="lead">Reparte tu margen de impuestos, vota proyectos sin saber quién los presentó y mira con qué senadores coincides.</p>
   </header>
 
-  <div class="banner" role="note"><b>Votos reales.</b> __NV__ votaciones nominales del Senado entre 2022 y 2025, tomadas de los <a href="https://tramitacion.senado.cl/" target="_blank" rel="noopener">datos abiertos del Senado</a> el __BUILT__. Cada conteo por senador cuadra con el total oficial de la votación.</div>
+  <div class="banner" role="note"><b>Votos reales.</b> <span id="bannerN"></span> votaciones nominales del <span id="bannerP"></span>, tomadas de los <a href="https://tramitacion.senado.cl/" target="_blank" rel="noopener">datos abiertos del Senado</a> el __BUILT__. Cada conteo por senador cuadra con el total oficial de la votación.</div>
+
+  <fieldset class="period" id="period">
+    <legend>Período</legend>
+  </fieldset>
 
   <nav class="steps" aria-label="Pasos">
     <button class="step-btn" data-go="1"><b>1. Reparto</b><span>Tu margen de impuestos</span></button>
@@ -260,7 +271,7 @@ footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; 
     <summary>Cómo funciona y de dónde salen los datos</summary>
     <div class="body">
       <h3>Qué votaciones aparecen</h3>
-      <p>__NV__ votaciones nominales del Senado del período legislativo 2022–2026, todas sobre el proyecto completo: votación en general, votación única o informe de Comisión Mixta. No se incluyen trámites, como aplazar una votación o devolver un proyecto a comisión, ni votaciones de un solo artículo, porque sin el texto del artículo no se puede votar a ciegas con sentido.</p>
+      <p>__NVLIST__. Todas son votaciones nominales sobre el proyecto completo: votación en general, votación única o informe de Comisión Mixta. No se incluyen trámites, como aplazar una votación o devolver un proyecto a comisión, ni votaciones de un solo artículo, porque sin el texto del artículo no se puede votar a ciegas con sentido.</p>
       <p>Se eligieron votaciones de áreas que calzan con el reparto de impuestos y, cuando fue posible, votaciones divididas. Algunas áreas, como educación, casi no tienen votaciones divididas en el período: también es un dato.</p>
       <h3>Cómo se calcula la coincidencia</h3>
       <ul>
@@ -273,6 +284,8 @@ footer { font-size: 0.82rem; color: var(--muted); display: flex; gap: 6px 16px; 
         <li>Votos, totales y tramitación: <a href="https://tramitacion.senado.cl/" target="_blank" rel="noopener">datos abiertos del Senado</a>. En cada votación, la suma de votos por senador cuadra con el total oficial.</li>
         <li>Partido: militancia registrada por la <a href="https://datos.bcn.cl/" target="_blank" rel="noopener">Biblioteca del Congreso Nacional</a> a la fecha de cada voto. Si no hay registro para esa fecha, aparece "sin dato".</li>
         <li>Títulos breves: los escribimos para que se lean rápido. Debajo de cada uno va el título oficial del proyecto.</li>
+        <li>Período actual: muchos senadores que asumieron en marzo de 2026 aún no tienen su militancia en la BCN. Si la lista de senadores vigentes del Senado la informa, se usa esa; si no, aparece "sin dato".</li>
+        <li>Proyectos enviados por el Ejecutivo desde marzo de 2026: se indican como "Gobierno en ejercicio desde marzo de 2026", porque los registros del Senado no nombran al Presidente.</li>
       </ul>
       <h3>Lo que todavía no incluye</h3>
       <ul>
@@ -296,25 +309,28 @@ var DATA = __DATA__;
 (function () {
   "use strict";
 
-  var BILLS = DATA.bills, SENS = DATA.sens;
+  var PERIODS = DATA.periodos, P = PERIODS[0];
+  var BILLS = P.bills, SENS = P.sens;
   var AREAS = [];
-  BILLS.forEach(function (b) { if (AREAS.indexOf(b.area) < 0) AREAS.push(b.area); });
+  PERIODS.forEach(function (per) { per.bills.forEach(function (b) { if (AREAS.indexOf(b.area) < 0) AREAS.push(b.area); }); });
   var DEFS = [
     { id: "prop", pct: 60, label: "Propuesta inicial: 60% comprometido", hint: "Cifra redonda de partida del proyecto." },
     { id: "dipres", pct: 63.4, label: "Dipres: 63,4% por leyes permanentes", hint: "Gasto por leyes permanentes sobre el gasto neto de las partidas fiscales (datos a 2025)." },
     { id: "lyd", pct: 73, label: "Libertad y Desarrollo: 73%", hint: "Gasto por leyes permanentes sobre el gasto total del presupuesto 2026." },
     { id: "cep", pct: 83, label: "CEP Chile: 83%", hint: "Gasto comprometido por leyes permanentes; máximo de la serie en 2026 y se mantiene en 2027." }
   ];
-  var EXAMPLE_W = [25, 20, 15, 15, 10, 10, 5];
+  var EXAMPLE_W = [20, 15, 15, 15, 10, 10, 10, 5];
   var SHOW = 10;
 
-  var state = { def: "dipres", tax: 2400000, w: EXAMPLE_W.slice(0, AREAS.length), ans: {}, q: "", all: false };
+  function exampleW() { var w = AREAS.map(function (_, i) { return EXAMPLE_W[i] || 0; }); w[0] += 100 - sum(w); return w; }
+  /* saved: votos de todos los períodos por boletín y fecha; ans: los del período visible, por posición */
+  var state = { def: "dipres", tax: 2400000, w: null, saved: {}, ans: {}, q: "", all: false, per: P.id };
   var $ = function (s) { return document.querySelector(s); };
   var nf = new Intl.NumberFormat("es-CL", { maximumFractionDigits: 0 });
   var pf = function (n) { return n.toLocaleString("es-CL", { maximumFractionDigits: 1 }); };
   var clp = function (n) { return "$" + nf.format(Math.round(n)); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
-  var sum = function (a) { return a.reduce(function (s, x) { return s + x; }, 0); };
+  function sum(a) { return a.reduce(function (s, x) { return s + x; }, 0); }
   var defOf = function () { return DEFS.filter(function (d) { return d.id === state.def; })[0]; };
   var billsIn = function (a) { return BILLS.map(function (b, i) { return i; }).filter(function (i) { return BILLS[i].area === a; }); };
   var fecha = function (iso) { var p = iso.split("-"); return Number(p[2]) + "/" + Number(p[1]) + "/" + p[0]; };
@@ -359,8 +375,7 @@ var DATA = __DATA__;
     }).join("");
     $("#tax").value = nf.format(state.tax);
     $("#areas").innerHTML = AREAS.map(function (a, i) {
-      var n = billsIn(a).length;
-      return '<div class="area-row"><label class="nm" for="r' + i + '">' + a + "<small>" + n + (n === 1 ? " votación" : " votaciones") + "</small></label>" +
+      return '<div class="area-row"><label class="nm" for="r' + i + '">' + a + '<small id="n' + i + '"></small></label>' +
         '<input type="range" id="r' + i + '" min="0" max="100" step="1" value="' + state.w[i] + '" data-i="' + i + '">' +
         '<div class="val" id="v' + i + '"></div></div>';
     }).join("");
@@ -382,6 +397,8 @@ var DATA = __DATA__;
       var ofTotal = state.w[i] * free / 100;
       $("#v" + i).innerHTML = "<b>" + state.w[i] + " pts</b><small>" + pf(ofTotal) + "% · " + clp(state.tax * ofTotal / 100) + "</small>";
       $("#r" + i).value = state.w[i];
+      var n = billsIn(a).length;
+      $("#n" + i).textContent = n ? n + (n === 1 ? " votación" : " votaciones") : "Sin votaciones en este período";
       $("#r" + i).setAttribute("aria-valuetext", state.w[i] + " puntos, " + pf(ofTotal) + "% del gasto, " + clp(state.tax * ofTotal / 100));
     });
   }
@@ -404,7 +421,7 @@ var DATA = __DATA__;
     state.w = AREAS.map(function (_, i) { return base + (i < rest ? 1 : 0); });
     updateStep1(); save();
   });
-  $("#reset").addEventListener("click", function () { state.w = EXAMPLE_W.slice(0, AREAS.length); updateStep1(); save(); });
+  $("#reset").addEventListener("click", function () { state.w = exampleW(); updateStep1(); save(); });
   $("#to2").addEventListener("click", function () { go(2); });
 
   /* ---------- Paso 2 ---------- */
@@ -415,12 +432,13 @@ var DATA = __DATA__;
   }
   function renderVote() {
     var act = activeAreas(), html = "", n = 0;
-    if (!act.length) {
-      $("#vote").innerHTML = '<p class="empty">Aún no asignaste margen a ninguna área. Vuelve al reparto para elegir qué te importa.</p>';
+    if (!act.some(function (x) { return billsIn(x.a).length; })) {
+      $("#vote").innerHTML = '<p class="empty">Aún no asignaste margen a ninguna área con votaciones en este período. Vuelve al reparto para elegir qué te importa.</p>';
       updateProgress();
       return;
     }
     act.forEach(function (x) {
+      if (!billsIn(x.a).length) return;
       html += '<section class="area-block" style="margin-bottom:20px"><div class="area-head"><h3>' + esc(x.a) + '</h3><span class="w">Tu prioridad: ' + x.w + " de 100 puntos</span></div>";
       billsIn(x.a).forEach(function (id) {
         n++;
@@ -449,6 +467,7 @@ var DATA = __DATA__;
     $("#progBar").style.width = (total ? Math.round(done / total * 100) : 0) + "%";
     $("#nextPending").hidden = !left || !total;
     $("#clearAns").hidden = !Object.keys(state.ans).length;
+    $("#clearAns").textContent = clearArmed ? "¿Seguro? Toca de nuevo para borrar" : "Borrar mis respuestas de este período";
     $("#to3").disabled = done === 0;
   }
   $("#vote").addEventListener("click", function (e) {
@@ -456,6 +475,7 @@ var DATA = __DATA__;
     if (!b) return;
     var id = Number(b.getAttribute("data-bill")), val = Number(b.getAttribute("data-val"));
     state.ans[id] = val;
+    state.saved[billKey(BILLS[id])] = val;
     var sibs = b.parentNode.querySelectorAll(".opt");
     for (var k = 0; k < sibs.length; k++) sibs[k].setAttribute("aria-pressed", sibs[k] === b ? "true" : "false");
     updateProgress();
@@ -476,9 +496,11 @@ var DATA = __DATA__;
   });
   /* El botón pide confirmación en la misma página: el visor no muestra confirm(). */
   var clearArmed = false;
+  var billKey = function (b) { return b.bol + "|" + b.fecha; };
   $("#clearAns").addEventListener("click", function () {
     if (!clearArmed) { clearArmed = true; this.textContent = "¿Seguro? Toca de nuevo para borrar"; return; }
-    clearArmed = false; this.textContent = "Borrar mis respuestas";
+    clearArmed = false;
+    BILLS.forEach(function (b) { delete state.saved[billKey(b)]; });
     state.ans = {}; save(); renderVote();
   });
   $("#back1").addEventListener("click", function () { go(1); });
@@ -565,7 +587,7 @@ var DATA = __DATA__;
   function shareText(res, ids) {
     var top = res.filter(function (r) { return r.score !== null && r.voted * 2 >= r.total; }).slice(0, 3);
     if (!top.length) return "";
-    return "Voté " + ids.length + (ids.length === 1 ? " proyecto" : " proyectos") + " del Senado sin saber quién los presentó. Con quienes más coincido:\n" +
+    return "Voté " + ids.length + (ids.length === 1 ? " proyecto" : " proyectos") + " del " + P.nombre + " sin saber quién los presentó. Con quienes más coincido:\n" +
       top.map(function (r, i) { return (i + 1) + ". " + r.S.n + (r.S.p ? " (" + r.S.p + ")" : "") + ": " + Math.round(r.score * 100) + "%"; }).join("\n") +
       "\n\nHaz el tuyo en " + SITE;
   }
@@ -604,6 +626,28 @@ var DATA = __DATA__;
   $("#q").addEventListener("input", function (e) { state.q = e.target.value; renderResults(); });
   $("#all").addEventListener("click", function () { state.all = !state.all; renderResults(); });
 
+  /* ---------- Período ---------- */
+  function setPeriod(id) {
+    P = PERIODS.filter(function (x) { return x.id === id; })[0] || PERIODS[0];
+    BILLS = P.bills; SENS = P.sens; state.per = P.id;
+    state.ans = {};
+    BILLS.forEach(function (b, i) { var v = state.saved[billKey(b)]; if (v !== undefined) state.ans[i] = v; });
+    $("#bannerN").textContent = BILLS.length;
+    $("#bannerP").textContent = P.nombre;
+    var radios = document.querySelectorAll("#period input");
+    for (var k = 0; k < radios.length; k++) radios[k].checked = radios[k].value === P.id;
+  }
+  $("#period").innerHTML = '<legend>Período</legend>' + PERIODS.map(function (per) {
+    return '<label><input type="radio" name="period" value="' + per.id + '"><span>' + esc(per.nombre) + "</span></label>";
+  }).join("");
+  $("#period").addEventListener("change", function (e) {
+    if (e.target.name !== "period") return;
+    setPeriod(e.target.value); save();
+    updateStep1();
+    if (state.step === 2) renderVote();
+    if (state.step === 3) renderResults();
+  });
+
   /* ---------- Navegación ---------- */
   function go(n) {
     state.step = n; save();
@@ -625,30 +669,30 @@ var DATA = __DATA__;
   });
 
   /* ---------- Progreso guardado en este navegador ----------
-     Se guardan el reparto, los votos y el paso. No se guarda el monto de impuestos.
+     Se guardan el reparto, los votos, el período y el paso. No se guarda el monto de impuestos.
      Los votos se guardan por boletín y fecha, para que sigan valiendo si cambia el orden de las votaciones. */
   var KEY = "votop:v1";
-  var billKey = function (b) { return b.bol + "|" + b.fecha; };
   function save() {
     if (!booted) return;
-    var ans = {};
-    Object.keys(state.ans).forEach(function (id) { ans[billKey(BILLS[id])] = state.ans[id]; });
-    try { localStorage.setItem(KEY, JSON.stringify({ def: state.def, w: state.w, areas: AREAS, ans: ans, step: state.step })); } catch (e) {}
+    try { localStorage.setItem(KEY, JSON.stringify({ def: state.def, w: state.w, areas: AREAS, ans: state.saved, step: state.step, per: state.per })); } catch (e) {}
   }
   function load() {
     var s = null;
     try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+    state.w = exampleW();
     if (!s) return 1;
     if (DEFS.some(function (d) { return d.id === s.def; })) state.def = s.def;
     if (Array.isArray(s.w) && Array.isArray(s.areas)) {
       var w = AREAS.map(function (a) { var k = s.areas.indexOf(a); return k >= 0 ? Number(s.w[k]) || 0 : 0; });
       if (sum(w) <= 100) state.w = w;
     }
-    BILLS.forEach(function (b, i) { var v = s.ans && s.ans[billKey(b)]; if (v === 1 || v === -1 || v === 0) state.ans[i] = v; });
+    Object.keys(s.ans || {}).forEach(function (k) { var v = s.ans[k]; if (v === 1 || v === -1 || v === 0) state.saved[k] = v; });
+    if (PERIODS.some(function (x) { return x.id === s.per; })) state.per = s.per;
     return [1, 2, 3].indexOf(s.step) >= 0 ? s.step : 1;
   }
   var booted = false, moved = false;
   var startStep = load();
+  setPeriod(state.per);
   buildStep1();
   booted = true;
   go(startStep);

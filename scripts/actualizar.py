@@ -66,7 +66,7 @@ def sparql(q):
 
 def descargar(dest):
     sel = json.load(open(os.path.join(ROOT, "data", "seleccion.json"), encoding="utf-8"))
-    bols = sorted({v["boletin"] for a in sel["areas"] for v in a["votaciones"]})
+    bols = sorted({v["boletin"] for p in sel["periodos"] for a in p["areas"] for v in a["votaciones"]})
     print(f"Descargando {len(bols)} boletines del Senado…")
     for b in bols:
         for kind, prefix in (("votaciones", "sen"), ("tramitacion", "tram")):
@@ -75,6 +75,10 @@ def descargar(dest):
             if kind == "votaciones" and b"<votacion>" not in body:
                 raise RuntimeError(f"El boletín {b} no trae votaciones en el Senado")
             open(os.path.join(dest, f"{prefix}_{b}.xml"), "wb").write(body)
+    body = get("https://tramitacion.senado.cl/wspublico/senadores_vigentes.php")
+    if b"<senador>" not in body:
+        raise RuntimeError("El Senado no devolvió la lista de senadores vigentes")
+    open(os.path.join(dest, "sen_vigentes.xml"), "wb").write(body)
     print("Descargando militancias de la BCN…")
     for name, q in (("bcn_militancias.csv", Q_SENADORES), ("bcn_militancias_extra.csv", Q_EXTRA)):
         body = sparql(q)
@@ -86,6 +90,19 @@ def descargar(dest):
 def diferencias(antes, ahora):
     if not antes:
         return ["Primera versión de los datos."]
+    if "periodos" not in antes:  # formato antiguo, con un solo período
+        antes = {"periodos": [{"id": "2022-2026", "bills": antes["bills"], "sens": antes["sens"]}]}
+    out = []
+    PA = {p["id"]: p for p in antes["periodos"]}
+    for p in ahora["periodos"]:
+        if p["id"] not in PA:
+            out.append(f"+ Período nuevo: {p['nombre']} ({len(p['bills'])} votaciones, {len(p['sens'])} senadores)")
+            continue
+        out += [f"[{p['id']}] {x}" for x in diferencias_periodo(PA[p["id"]], p)]
+    return out or ["Sin cambios en votos, partidos ni tramitación."]
+
+
+def diferencias_periodo(antes, ahora):
     out = []
     A = {b["bol"] + "|" + b["fecha"]: b for b in antes["bills"]}
     for b in ahora["bills"]:
@@ -111,7 +128,7 @@ def diferencias(antes, ahora):
             out.append(f"~ {s['n']}: cambió algún voto registrado")
     for n in SA:
         out.append(f"- Senador que ya no aparece: {n}")
-    return out or ["Sin cambios en votos, partidos ni tramitación."]
+    return out
 
 
 def main():

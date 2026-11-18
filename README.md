@@ -4,7 +4,7 @@ Sitio publicado en [votop.cl](https://votop.cl). Reparte tu margen de impuestos,
 
 ## Datos
 
-Votaciones nominales reales del Senado de Chile (período 2022–2026), tomadas de los datos abiertos en `tramitacion.senado.cl/wspublico`. El script verifica que los votos por senador sumen el total oficial de cada votación.
+Votaciones nominales reales del Senado de Chile (períodos 2026–2030 y 2022–2026), tomadas de los datos abiertos en `tramitacion.senado.cl/wspublico`. El script verifica que los votos por senador sumen el total oficial de cada votación.
 
 El partido de cada senador es la militancia que registra la Biblioteca del Congreso Nacional ([datos.bcn.cl](https://datos.bcn.cl/)) a la fecha de cada voto. Si la BCN no tiene registro para esa fecha, la página muestra "sin dato" en vez de completarlo con otra fuente.
 
@@ -12,7 +12,7 @@ No se usan los datos abiertos de la Cámara: hoy asignan mal los nombres de quie
 
 ## Agregar o quitar votaciones
 
-La lista está en `data/seleccion.json`: cada votación se identifica por boletín y fecha, con su área y un título breve. El orden de las áreas en ese archivo es el orden en la página.
+La lista está en `data/seleccion.json`, separada por período legislativo; el primer período es el que la página muestra al abrir. Cada votación se identifica por boletín y fecha, con su área y un título breve. Si ese día hubo más de una votación del proyecto completo, se agrega `tema_contiene` con un texto que solo aparezca en la buscada; si no, el script se detiene en vez de elegir por su cuenta. El orden de las áreas en ese archivo es el orden en la página.
 
 ## Actualizar
 

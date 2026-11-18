@@ -5,8 +5,10 @@ d = json.load(open(f"{ROOT}/data/senado.json", encoding="utf-8"))
 t = open(f"{ROOT}/scripts/template.html", encoding="utf-8").read()
 y, m, dd = d["built"].split("-")
 NUMS = {1: "una", 2: "dos", 3: "tres", 4: "cuatro", 5: "cinco", 6: "seis", 7: "siete", 8: "ocho", 9: "nueve", 10: "diez"}
-areas = list(dict.fromkeys(b["area"] for b in d["bills"]))
-t = t.replace("__NV__", str(len(d["bills"]))).replace("__NA__", NUMS.get(len(areas), str(len(areas))))
+areas = list(dict.fromkeys(b["area"] for per in d["periodos"] for b in per["bills"]))
+partes = [f"{len(per['bills'])} votaciones del {per['nombre']}" for per in d["periodos"]]
+nvlist = partes[0] if len(partes) == 1 else ", ".join(partes[:-1]) + " y " + partes[-1]
+t = t.replace("__NVLIST__", nvlist[0].upper() + nvlist[1:]).replace("__NA__", NUMS.get(len(areas), str(len(areas))))
 body = t.replace("__BUILT__", f"{int(dd)}/{int(m)}/{y}").replace("__DATA__", json.dumps(d, ensure_ascii=False).replace("</", "<\\/"))
 os.makedirs(f"{ROOT}/dist", exist_ok=True)
 open(f"{ROOT}/dist/artifact.html", "w", encoding="utf-8").write(body)
